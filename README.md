@@ -1,2 +1,1 @@
-***Beh***
-Sports betting predictions social media app
+***Beh*** - Sports betting predictions social media app
