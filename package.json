@@ -6,11 +6,11 @@
   "type": "module",
   "scripts": {
     "start": "cd backend && npm start",
-    "build": "cd frontend && npm install && npm run build",
-    "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "build": "npm run install-deps && npm run build-frontend",
+    "install-deps": "cd backend && npm install && cd ../frontend && npm install",
+    "build-frontend": "cd frontend && npm run build",
     "dev:frontend": "cd frontend && npm run dev",
-    "dev:backend": "cd backend && npm run dev",
-    "postinstall": "npm run install-all"
+    "dev:backend": "cd backend && npm run dev"
   },
   "engines": {
     "node": ">=18.0.0"
