@@ -49,12 +49,32 @@ const LoginPage = () => {
                             type="text"
                             value={credentials.username} 
                             onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+                            size="lg"
+                            variant="filled"
+                            bg="whiteAlpha.300"
+                            color="white"
+                            _placeholder={{ color: "gray.400" }}
+                            _hover={{ bg: "whiteAlpha.400" }}
+                            _focus={{ 
+                                bg: "whiteAlpha.500",
+                                borderColor: "whiteAlpha.500"
+                            }}
                         />
                         <Input 
                             placeholder='Password' 
                             type="password"
                             value={credentials.password} 
                             onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+                            size="lg"
+                            variant="filled"
+                            bg="whiteAlpha.300"
+                            color="white"
+                            _placeholder={{ color: "gray.400" }}
+                            _hover={{ bg: "whiteAlpha.400" }}
+                            _focus={{ 
+                                bg: "whiteAlpha.500",
+                                borderColor: "whiteAlpha.500"
+                            }}
                         />
                         <Button 
                             onClick={handleLogin} 
@@ -63,6 +83,8 @@ const LoginPage = () => {
                             loadingText="Logging in..."
                             _hover={{ transform: 'scale(1.02)' }}
                             transition="all 0.2s"
+                            bg="whiteAlpha.300"
+                            color="white"
                         >
                             Login
                         </Button>
