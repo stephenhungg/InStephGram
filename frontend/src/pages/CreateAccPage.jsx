@@ -44,10 +44,9 @@ const CreateAccPage = () => {
                     p={8} 
                     rounded={"lg"} 
                     shadow={"lg"} 
-                    bg="whiteAlpha.200" 
                     backdropFilter="blur(10px)"
                 >
-                    <VStack spacing={6}>
+                    <VStack spacing={4}>
                         <Input 
                             placeholder='Username' 
                             type="text"
@@ -61,7 +60,7 @@ const CreateAccPage = () => {
                             _hover={{ bg: "whiteAlpha.400" }}
                             _focus={{ 
                                 bg: "whiteAlpha.500",
-                                borderColor: "blue.500"
+                                borderColor: "whiteAlpha.500"
                             }}
                         />
                         <Input 
@@ -77,7 +76,7 @@ const CreateAccPage = () => {
                             _hover={{ bg: "whiteAlpha.400" }}
                             _focus={{ 
                                 bg: "whiteAlpha.500",
-                                borderColor: "blue.500"
+                                borderColor: "whiteAlpha.500"
                             }}
                         />
                         <Input 
@@ -100,11 +99,11 @@ const CreateAccPage = () => {
                             onClick={handleAddUser}
                             w='full'
                             size="lg"
-                            colorScheme="blue"
+                            colorScheme="whiteAlpha"
                             mt={4}
                             _hover={{ 
                                 transform: 'scale(1.02)',
-                                bg: "blue.500"
+                                bg: "whiteAlpha.500"
                             }}
                             transition="all 0.2s"
                         >

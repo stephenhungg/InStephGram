@@ -79,12 +79,13 @@ const LoginPage = () => {
                         <Button 
                             onClick={handleLogin} 
                             w='full'
+                            size="lg"
                             isLoading={isLoading}
                             loadingText="Logging in..."
                             _hover={{ transform: 'scale(1.02)' }}
                             transition="all 0.2s"
-                            bg="whiteAlpha.300"
-                            color="white"
+                            bg="whiteAlpha.500"
+                            colorScheme="whiteAlpha"
                         >
                             Login
                         </Button>

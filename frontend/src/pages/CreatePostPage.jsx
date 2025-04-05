@@ -113,7 +113,7 @@ const CreatePostPage = () => {
                                 justifyContent="center"
                                 cursor="pointer"
                                 position="relative"
-                                _hover={{ borderColor: "blue.500" }}
+                                _hover={{ borderColor: "whiteAlpha.500" }}
                             >
                                 <input
                                     type="file"
@@ -128,7 +128,7 @@ const CreatePostPage = () => {
                                     onChange={(e) => handleFileChanges(e.target.files)}
                                 />
                                 <Icon as={LuUpload} boxSize={8} color="gray.400" />
-                                <Text mt={2} color="gray.400">Click to upload your screenshot</Text>
+                                <Text mt={2} color="gray.400">Click to upload your picture</Text>
                             </Box>
                         ) : (
                             <Box position="relative">
@@ -187,7 +187,7 @@ const CreatePostPage = () => {
                         <Button 
                             onClick={handleAddPost}
                             w='full'
-                            colorScheme="blue"
+                            colorScheme="whiteAlpha"
                             mt={4}
                             _hover={{ transform: 'scale(1.02)' }}
                             transition="all 0.2s"
