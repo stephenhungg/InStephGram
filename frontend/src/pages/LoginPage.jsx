@@ -8,7 +8,7 @@ const LoginPage = () => {
     const { setCurrentUser } = useUserGlobal();
     const [credentials, setCredentials] = useState({
         username: "",
-        password: "",
+        password: "",   
     });
     const [isLoading, setIsLoading] = useState(false);
 
