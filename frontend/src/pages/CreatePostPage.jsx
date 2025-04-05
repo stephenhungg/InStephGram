@@ -187,6 +187,7 @@ const CreatePostPage = () => {
                         <Button 
                             onClick={handleAddPost}
                             w='full'
+                            color="white"
                             colorScheme="whiteAlpha"
                             mt={4}
                             _hover={{ transform: 'scale(1.02)' }}
