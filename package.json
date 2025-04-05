@@ -3,11 +3,14 @@
   "version": "1.0.0",
   "description": "A social media app for sharing bad content",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "cd backend && node server.js",
+    "start": "cd backend && npm start",
     "build": "cd frontend && npm install && npm run build",
-    "install-backend": "cd backend && npm install",
-    "postinstall": "npm run install-backend"
+    "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "postinstall": "npm run install-all"
   },
   "engines": {
     "node": ">=18.0.0"
