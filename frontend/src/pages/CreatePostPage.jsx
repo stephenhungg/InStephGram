@@ -4,6 +4,7 @@ import { LuUpload, LuX } from "react-icons/lu"
 import { usePostGlobal } from '../global/post';
 import { useUserGlobal } from '../global/user';
 import { useNavigate } from 'react-router-dom';
+import { apiRequest, uploadFile } from '../utils/api';
 
 const CreatePostPage = () => {
     const { currentUser } = useUserGlobal();
@@ -35,34 +36,16 @@ const CreatePostPage = () => {
             const formData = new FormData();
             formData.append('file', imageFile);
 
-            const response = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const uploadResponse = await response.json();
+            const uploadResponse = await uploadFile('/api/upload', formData);
 
             if (uploadResponse.success) {
                 const imageUrl = uploadResponse.imageUrl;
                 const postWithImage = { ...newPost, image: imageUrl };
                 
-                const response = await fetch('/api/posts', {
+                const postResponse = await apiRequest('/api/posts', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
                     body: JSON.stringify(postWithImage),
                 });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const postResponse = await response.json();
 
                 if (postResponse.success) {
                     setNewPost({
@@ -74,11 +57,7 @@ const CreatePostPage = () => {
                     setPreviewImage("");
                     setImageFile(null);
                     navigate('/');
-                } else {
-                    console.error("Failed to create post:", postResponse.message || "Unknown error");
                 }
-            } else {
-                console.error("Failed to upload image");
             }
         } catch (error) {
             console.error('Error uploading image or creating post:', error);

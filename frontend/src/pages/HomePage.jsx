@@ -3,6 +3,7 @@ import { Container, VStack, Link, Text, Box, Image, Heading, Button, HStack, Ico
 import { Link as RouterLink } from 'react-router-dom';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import { useUserGlobal } from '../global/user';
+import { apiRequest } from '../utils/api';
 
 const HomePage = () => {
     const [posts, setPosts] = useState([]);
@@ -13,8 +14,7 @@ const HomePage = () => {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const response = await fetch('/api/posts');
-                const data = await response.json();
+                const data = await apiRequest('/api/posts');
                 if (data.success) {
                     setPosts(data.data
                         .map(post => ({
@@ -24,8 +24,6 @@ const HomePage = () => {
                         }))
                         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                     );
-                } else {
-                    console.error('Failed to fetch posts:', data.message);
                 }
             } catch (error) {
                 console.error('Error fetching posts:', error);
@@ -38,22 +36,15 @@ const HomePage = () => {
     }, []);
 
     const handleLike = async (postId) => {
-
-        // Prevent multiple clicks while processing
         if (likingInProgress[postId]) return;
 
         try {
             setLikingInProgress(prev => ({ ...prev, [postId]: true }));
 
-            const response = await fetch(`/api/posts/${postId}/like`, {
+            const data = await apiRequest(`/api/posts/${postId}/like`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify({ userId: currentUser._id }),
             });
-
-            const data = await response.json();
             
             if (data.success) {
                 setPosts(posts.map(post => {
@@ -67,8 +58,6 @@ const HomePage = () => {
                     }
                     return post;
                 }));
-            } else {
-                throw new Error(data.message || 'Failed to update like');
             }
         } catch (error) {
             console.error('Error liking post:', error);
