@@ -1,25 +1,15 @@
 {
-  "name": "ttpersonalproject",
+  "name": "beh-app",
   "version": "1.0.0",
+  "description": "A social media app for sharing bad content",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon node backend/server.js"
+    "start": "cd backend && node server.js",
+    "build": "cd frontend && npm install && npm run build",
+    "install-backend": "cd backend && npm install",
+    "postinstall": "npm run install-backend"
   },
-  "type": "module",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "@chakra-ui/react": "^3.13.0",
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "framer-motion": "^12.5.0",
-    "mongoose": "^8.12.1"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.9"
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

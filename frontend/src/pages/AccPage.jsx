@@ -1,45 +1,54 @@
-import React, { useState, useEffect } from 'react';
-import { Container, VStack, Link, Text, Box, Image, Heading, Button, HStack, Icon } from '@chakra-ui/react';
-import { Link as RouterLink } from 'react-router-dom';
-import { FaHeart, FaRegHeart } from 'react-icons/fa';
+import React, { useEffect, useState } from 'react';
+import { Box, Container, Heading, VStack, Text, Button, HStack, Image, Icon, Spinner, Link } from '@chakra-ui/react';
 import { useUserGlobal } from '../global/user';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { FaHeart, FaRegHeart } from 'react-icons/fa';
 
-const HomePage = () => {
-    const [posts, setPosts] = useState([]);
+const AccPage = () => {
+    const { currentUser, setCurrentUser } = useUserGlobal();
+    const navigate = useNavigate();
+    const [userPosts, setUserPosts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [likingInProgress, setLikingInProgress] = useState({});
-    const { currentUser } = useUserGlobal();
 
     useEffect(() => {
-        const fetchPosts = async () => {
+        if (!currentUser) {
+            navigate('/login');
+            return;
+        }
+
+        const fetchUserPosts = async () => {
             try {
                 const response = await fetch('/api/posts');
                 const data = await response.json();
                 if (data.success) {
-                    setPosts(data.data
+                    // Filter posts by current user and sort by date
+                    const filteredPosts = data.data
+                        .filter(post => post.userId === currentUser._id)
                         .map(post => ({
                             ...post,
                             likes: post.likes || [],
                             likesCount: post.likesCount || 0
                         }))
-                        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                    );
-                } else {
-                    console.error('Failed to fetch posts:', data.message);
+                        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    setUserPosts(filteredPosts);
                 }
             } catch (error) {
-                console.error('Error fetching posts:', error);
+                console.error('Error fetching user posts:', error);
             } finally {
                 setIsLoading(false);
             }
         };
 
-        fetchPosts();
-    }, []);
+        fetchUserPosts();
+    }, [currentUser, navigate]);
+
+    const handleLogout = () => {
+        setCurrentUser(null);
+        navigate('/login');
+    };
 
     const handleLike = async (postId) => {
-
-        // Prevent multiple clicks while processing
         if (likingInProgress[postId]) return;
 
         try {
@@ -56,7 +65,7 @@ const HomePage = () => {
             const data = await response.json();
             
             if (data.success) {
-                setPosts(posts.map(post => {
+                setUserPosts(posts => posts.map(post => {
                     if (post._id === postId) {
                         return {
                             ...post,
@@ -67,8 +76,6 @@ const HomePage = () => {
                     }
                     return post;
                 }));
-            } else {
-                throw new Error(data.message || 'Failed to update like');
             }
         } catch (error) {
             console.error('Error liking post:', error);
@@ -81,44 +88,90 @@ const HomePage = () => {
         return post.likes?.some(likeId => likeId === currentUser?._id);
     };
 
+    if (!currentUser) {
+        return null;
+    }
+
     return (
-        <Container maxW="container.md" py={12}>
-            <VStack spacing={12}>
-                {isLoading ? (
-                    <Text fontSize="xl" color="gray.500">Loading posts...</Text>
-                ) : posts.length === 0 ? (
-                    <>
-                        <Text
-                            fontSize={{base:"4xl", sm:"6xl"}}
-                            fontWeight={"bold"}
-                            bgClip={"text"} 
-                            textAlign={"center"}
-                            color="white"
-                            mb={2}
-                        >   
-                            Welcome to InStephGram
-                        </Text>
-                        <Text
-                            fontSize={{base:"lg", sm:"xl"}}
-                            textAlign={"center"}
-                            color="gray.400"
-                            mb={8}
-                            px={4}
+        <Container maxW="container.md" py={8}>
+            <VStack spacing={8} align="stretch">
+                <Heading 
+                    as="h1" 
+                    size="2xl" 
+                    textAlign="center" 
+                    bgClip="text"
+                    color="white"
+                >
+                    Account Information
+                </Heading>
+                
+                {/* User Info */}
+                <Box 
+                    w="full" 
+                    p={6} 
+                    rounded="lg" 
+                    shadow="md" 
+                    bg="whiteAlpha.200"
+                    backdropFilter="blur(10px)"
+                >
+                    <VStack spacing={4} align="stretch">
+                        <Box>
+                            <Text fontWeight="bold" color="gray.400">Username</Text>
+                            <Text fontSize="lg" color="white">{currentUser.username}</Text>
+                        </Box>
+                        
+                        <Box>
+                            <Text fontWeight="bold" color="gray.400">Email</Text>
+                            <Text fontSize="lg" color="white">{currentUser.email}</Text>
+                        </Box>
+                        
+                        {currentUser.createdAt && (
+                            <Box>
+                                <Text fontWeight="bold" color="gray.400">Member Since</Text>
+                                <Text fontSize="lg" color="white">
+                                    {new Date(currentUser.createdAt).toLocaleDateString()}
+                                </Text>
+                            </Box>
+                        )}
+                        
+                        <Button 
+                            colorScheme="red" 
+                            onClick={handleLogout}
+                            mt={4}
+                            _hover={{ transform: 'scale(1.02)' }}
+                            transition="all 0.2s"
                         >
-                            Your mission: Post the worst content possible and collect those dislikes!
-                        </Text>
-                        <Text fontSize='xl' textAlign={"center"} fontWeight='bold' color='gray.500'>
-                            No posts yet, create one!{" "}
-                            <RouterLink to={"/post"}>
-                                <Text as='span' color='blue.500' fontWeight='bold' _hover={{ textDecoration: "underline"}}> 
-                                    Create Post
-                                </Text>    
-                            </RouterLink>
-                        </Text>
-                    </>
+                            Logout
+                        </Button>
+                    </VStack>
+                </Box>
+
+                {/* User Posts */}
+                <Heading 
+                    as="h2" 
+                    size="xl" 
+                    textAlign="center" 
+                    color="white"
+                >
+                    Your Posts
+                </Heading>
+
+                {isLoading ? (
+                    <Box display="flex" justifyContent="center" w="full">
+                        <Spinner size="xl" color="white" />
+                    </Box>
+                ) : userPosts.length === 0 ? (
+                    <Text fontSize="lg" color="gray.400" textAlign="center">
+                        You haven't created any posts yet.{" "}
+                        <RouterLink to="/post">
+                            <Text as="span" color="blue.400" _hover={{ textDecoration: "underline" }}>
+                                Create your first post
+                            </Text>
+                        </RouterLink>
+                    </Text>
                 ) : (
-                    <VStack spacing={8} align="center" w="full">
-                        {posts.map((post) => (
+                    <VStack spacing={6} align="center">
+                        {userPosts.map((post) => (
                             <Box
                                 key={post._id}
                                 maxW="500px"
@@ -130,18 +183,12 @@ const HomePage = () => {
                                 shadow="md"
                                 mx="auto"
                             >
-                                {/* Author Header */}
-                                <Box p={3} borderBottom="1px" borderColor="whiteAlpha.200">
+                                {/* Post Header */}
+                                <Box p={4} borderBottom="1px" borderColor="whiteAlpha.200">
                                     <HStack justify="space-between">
-                                        <Link
-                                            as={RouterLink}
-                                            to={`/user/${post.author}`}
-                                            _hover={{ textDecoration: 'underline' }}
-                                        >
-                                            <Text color="white" fontWeight="bold">
-                                                {post.author}
-                                            </Text>
-                                        </Link>
+                                        <Text color="white" fontWeight="bold">
+                                            {post.title}
+                                        </Text>
                                         <Text color="gray.400" fontSize="sm">
                                             {new Date(post.createdAt).toLocaleDateString(undefined, {
                                                 year: 'numeric',
@@ -186,12 +233,12 @@ const HomePage = () => {
                                     </Link>
                                 </Box>
 
-                                {/* Like Button and Post Content */}
-                                <Box p={3}>
-                                    <HStack spacing={4} mb={3}>
+                                {/* Post Actions */}
+                                <Box p={4}>
+                                    <HStack spacing={4}>
                                         <Button
                                             onClick={() => handleLike(post._id)}
-                                            isDisabled={!currentUser || likingInProgress[post._id]}
+                                            isDisabled={likingInProgress[post._id]}
                                             isLoading={likingInProgress[post._id]}
                                             variant="unstyled"
                                             display="flex"
@@ -201,7 +248,6 @@ const HomePage = () => {
                                                 transition: 'transform 0.2s'
                                             }}
                                             transition="all 0.2s"
-                                            p={2}
                                         >
                                             <Icon
                                                 as={isPostLiked(post) ? FaHeart : FaRegHeart}
@@ -217,18 +263,7 @@ const HomePage = () => {
                                             </Text>
                                         </Button>
                                     </HStack>
-
-                                    <Heading 
-                                        size="md" 
-                                        mb={2}
-                                        color="white"
-                                    >
-                                        {post.title}
-                                    </Heading>
-                                    <Text 
-                                        color="gray.400" 
-                                        fontSize="md"
-                                    >
+                                    <Text color="white" mt={2}>
                                         {post.caption}
                                     </Text>
                                 </Box>
@@ -241,4 +276,4 @@ const HomePage = () => {
     );
 };
 
-export default HomePage;
+export default AccPage;

@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
         unique: true,
         trim: true
     },
-    passwordHash: {
+    password: {
         type: String,
         required: true
     },
@@ -24,6 +24,14 @@ const userSchema = new mongoose.Schema({
     profileImage: {
         type: String,
         default: ""
+    },
+    posts: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Post'
+    }],
+    totalLikesReceived: {
+        type: Number,
+        default: 0
     },
     createdAt: {
         type: Date,

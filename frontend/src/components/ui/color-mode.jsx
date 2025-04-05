@@ -1,27 +1,13 @@
 'use client'
 
-import { ClientOnly, IconButton, Skeleton, Span } from '@chakra-ui/react'
-import { ThemeProvider, useTheme } from 'next-themes'
-
+import { useColorMode as useChakraColorMode } from '@chakra-ui/color-mode'
+import { IconButton } from '@chakra-ui/react'
+import { SunIcon, MoonIcon } from '@chakra-ui/icons'
 import * as React from 'react'
 import { LuMoon, LuSun } from 'react-icons/lu'
 
-export function ColorModeProvider(props) {
-  return (
-    <ThemeProvider attribute='class' disableTransitionOnChange {...props} />
-  )
-}
-
 export function useColorMode() {
-  const { resolvedTheme, setTheme } = useTheme()
-  const toggleColorMode = () => {
-    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
-  }
-  return {
-    colorMode: resolvedTheme,
-    setColorMode: setTheme,
-    toggleColorMode,
-  }
+  return useChakraColorMode()
 }
 
 export function useColorModeValue(light, dark) {
@@ -34,31 +20,31 @@ export function ColorModeIcon() {
   return colorMode === 'dark' ? <LuMoon /> : <LuSun />
 }
 
-export const ColorModeButton = React.forwardRef(
-  function ColorModeButton(props, ref) {
-    const { toggleColorMode } = useColorMode()
-    return (
-      <ClientOnly fallback={<Skeleton boxSize='8' />}>
-        <IconButton
-          onClick={toggleColorMode}
-          variant='ghost'
-          aria-label='Toggle color mode'
-          size='sm'
-          ref={ref}
-          {...props}
-          css={{
-            _icon: {
-              width: '5',
-              height: '5',
-            },
-          }}
-        >
-          <ColorModeIcon />
-        </IconButton>
-      </ClientOnly>
-    )
-  },
-)
+export function ColorModeToggle(props) {
+  const { colorMode, toggleColorMode } = useColorMode()
+
+  return (
+    <IconButton
+      variant="ghost"
+      icon={colorMode === 'dark' ? <SunIcon /> : <MoonIcon />}
+      onClick={toggleColorMode}
+      aria-label={`Toggle ${colorMode === 'dark' ? 'Light' : 'Dark'} Mode`}
+      color="white"
+      _hover={{ bg: 'whiteAlpha.100' }}
+      _active={{ bg: 'whiteAlpha.200' }}
+      {...props}
+    />
+  )
+}
+
+// These are no longer needed since we're using Chakra UI's built-in color mode
+export function ColorModeProvider({ children }) {
+  return children
+}
+
+export function ColorModeScript() {
+  return null
+}
 
 export const LightMode = React.forwardRef(function LightMode(props, ref) {
   return (
