@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, Container, Heading, Input, VStack, Image, IconButton, Text, Icon } from '@chakra-ui/react';
+import { Box, Button, Container, Heading, Input, VStack, Image, IconButton, Text, Icon, useToast } from '@chakra-ui/react';
 import { LuUpload, LuX } from "react-icons/lu"
 import { usePostGlobal } from '../global/post';
 import { useUserGlobal } from '../global/user';
@@ -9,6 +9,7 @@ import { apiRequest, uploadFile } from '../utils/api';
 const CreatePostPage = () => {
     const { currentUser } = useUserGlobal();
     const navigate = useNavigate();
+    const toast = useToast();
     const [newPost, setNewPost] = useState({
         title: "",
         caption: "",
@@ -17,20 +18,22 @@ const CreatePostPage = () => {
     });
     const [previewImage, setPreviewImage] = useState("");
     const [imageFile, setImageFile] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
     const {createPost} = usePostGlobal();
 
     const handleAddPost = async() => {
-        console.log("Attempting to create post with data:", newPost);
         if (!newPost.title || !newPost.caption || !newPost.userId || !imageFile) {
-            console.log("Missing fields:", {
-                title: !newPost.title,
-                caption: !newPost.caption,
-                userId: !newPost.userId,
-                imageFile: !imageFile
+            toast({
+                title: "Missing fields",
+                description: "Please fill in all fields and select an image",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
             });
             return;
         }
 
+        setIsLoading(true);
         try {
             // Upload image to backend for S3 upload
             const formData = new FormData();
@@ -48,6 +51,13 @@ const CreatePostPage = () => {
                 });
 
                 if (postResponse.success) {
+                    toast({
+                        title: "Post created",
+                        description: "Your post has been created successfully",
+                        status: "success",
+                        duration: 3000,
+                        isClosable: true,
+                    });
                     setNewPost({
                         title: "",
                         caption: "",
@@ -58,140 +68,154 @@ const CreatePostPage = () => {
                     setImageFile(null);
                     navigate('/');
                 }
+            } else {
+                toast({
+                    title: "Upload failed",
+                    description: uploadResponse.message || "Failed to upload image",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
             }
         } catch (error) {
             console.error('Error uploading image or creating post:', error);
+            toast({
+                title: "Error",
+                description: "An error occurred while creating your post. Please try again.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const handleFileChanges = (files) => {
-        const file = files[0];
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
         if (file) {
-            // Check file size (max 5MB)
-            if (file.size > 5 * 1024 * 1024) {
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                toast({
+                    title: "File too large",
+                    description: "Please select an image under 5MB",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+                return;
+            }
+            
+            if (!file.type.startsWith('image/')) {
+                toast({
+                    title: "Invalid file type",
+                    description: "Please select an image file",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
                 return;
             }
 
             setImageFile(file);
-
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviewImage(reader.result);
-            };
-            reader.readAsDataURL(file);
+            setPreviewImage(URL.createObjectURL(file));
         }
     };
 
     const removeImage = () => {
-        setNewPost({
-            ...newPost,
-            title: "",
-            caption: "",
-        });
         setPreviewImage("");
         setImageFile(null);
     };
 
     return (
-        <Container maxW={"container.sm"}>
+        <Container maxW="container.md" py={8}>
             <VStack spacing={8}>
-                <Heading as={"h1"} size={"2xl"} textAlign={"center"} mb={8} bgClip="text" color="white">
-                    Create New Post
-                </Heading>
-                <Box w={"full"} p={6} rounded={"lg"} shadow={"md"} bg="whiteAlpha.200" backdropFilter="blur(10px)">
+                <Heading color="white">Create New Post</Heading>
+                <Box w="100%" bg="whiteAlpha.200" p={6} rounded="lg">
                     <VStack spacing={4}>
-                        {!previewImage ? (
-                            <Box
-                                w="full"
-                                h="200px"
-                                border="2px dashed"
-                                borderColor="gray.400"
-                                rounded="lg"
-                                display="flex"
-                                flexDirection="column"
-                                alignItems="center"
-                                justifyContent="center"
-                                cursor="pointer"
-                                position="relative"
-                                _hover={{ borderColor: "whiteAlpha.500" }}
-                            >
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    style={{
-                                        position: "absolute",
-                                        width: "100%",
-                                        height: "100%",
-                                        opacity: 0,
-                                        cursor: "pointer"
-                                    }}
-                                    onChange={(e) => handleFileChanges(e.target.files)}
-                                />
-                                <Icon as={LuUpload} boxSize={8} color="gray.400" />
-                                <Text mt={2} color="gray.400">Click to upload your picture</Text>
-                            </Box>
-                        ) : (
-                            <Box position="relative">
-                                <Image
-                                    src={previewImage}
-                                    alt="Uploaded preview"
-                                    maxH="400px"
-                                    objectFit="contain"
-                                    rounded="lg"
-                                />
-                                <IconButton
-                                    icon={<LuX />}
-                                    position="absolute"
-                                    top={2}
-                                    right={2}
-                                    onClick={removeImage}
-                                    aria-label="Remove image"
-                                    bg="whiteAlpha.800"
-                                    _hover={{ bg: "whiteAlpha.900" }}
-                                />
-                            </Box>
-                        )}
-
-                        <Heading as="h3" size="sm" alignSelf="flex-start" mb={2} color="white">
-                            Post Details
-                        </Heading>
-                        <Input 
-                            placeholder='Title' 
-                            type="text"
-                            value={newPost.title} 
-                            onChange={(e) => {
-                                const title = e.target.value;
-                                setNewPost(prev => ({ 
-                                    ...prev, 
-                                    title
-                                }))
-                            }}
+                        <Input
+                            placeholder="Title"
+                            value={newPost.title}
+                            onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
+                            bg="whiteAlpha.100"
                             color="white"
-                            _placeholder={{ color: "gray.400" }}
+                            _placeholder={{ color: 'gray.400' }}
+                            _hover={{ bg: 'whiteAlpha.200' }}
+                            _focus={{ bg: 'whiteAlpha.200', borderColor: 'blue.300' }}
                         />
-                        <Input 
-                            placeholder='Caption' 
-                            type="text"
-                            value={newPost.caption} 
-                            onChange={(e) => {
-                                const caption = e.target.value;
-                                setNewPost(prev => ({ 
-                                    ...prev, 
-                                    caption
-                                }))
-                            }}
+                        <Input
+                            placeholder="Caption"
+                            value={newPost.caption}
+                            onChange={(e) => setNewPost({ ...newPost, caption: e.target.value })}
+                            bg="whiteAlpha.100"
                             color="white"
-                            _placeholder={{ color: "gray.400" }}
+                            _placeholder={{ color: 'gray.400' }}
+                            _hover={{ bg: 'whiteAlpha.200' }}
+                            _focus={{ bg: 'whiteAlpha.200', borderColor: 'blue.300' }}
                         />
+                        
+                        {/* Image Upload Section */}
+                        <Box
+                            w="100%"
+                            h="300px"
+                            border="2px dashed"
+                            borderColor="whiteAlpha.300"
+                            rounded="lg"
+                            position="relative"
+                            overflow="hidden"
+                        >
+                            {previewImage ? (
+                                <Box position="relative" w="100%" h="100%">
+                                    <Image
+                                        src={previewImage}
+                                        alt="Preview"
+                                        objectFit="contain"
+                                        w="100%"
+                                        h="100%"
+                                    />
+                                    <IconButton
+                                        icon={<Icon as={LuX} />}
+                                        position="absolute"
+                                        top={2}
+                                        right={2}
+                                        onClick={removeImage}
+                                        colorScheme="red"
+                                        rounded="full"
+                                    />
+                                </Box>
+                            ) : (
+                                <Button
+                                    as="label"
+                                    htmlFor="image-upload"
+                                    w="100%"
+                                    h="100%"
+                                    cursor="pointer"
+                                    display="flex"
+                                    flexDirection="column"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                    gap={2}
+                                    bg="transparent"
+                                    _hover={{ bg: 'whiteAlpha.100' }}
+                                >
+                                    <Icon as={LuUpload} boxSize={8} color="gray.400" />
+                                    <Text color="gray.400">Click to upload image</Text>
+                                </Button>
+                            )}
+                            <Input
+                                id="image-upload"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                display="none"
+                            />
+                        </Box>
 
-                        <Button 
+                        <Button
                             onClick={handleAddPost}
-                            w='full'
-                            color="white"
-                            colorScheme="whiteAlpha"
-                            mt={4}
-                            _hover={{ transform: 'scale(1.02)' }}
-                            transition="all 0.2s"
+                            colorScheme="blue"
+                            w="100%"
+                            isLoading={isLoading}
+                            loadingText="Creating post"
                         >
                             Create Post
                         </Button>
@@ -199,7 +223,7 @@ const CreatePostPage = () => {
                 </Box>
             </VStack>
         </Container>
-    )
-}
+    );
+};
 
 export default CreatePostPage;

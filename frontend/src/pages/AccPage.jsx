@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Container, Heading, VStack, Text, Button, HStack, Image, Icon, Spinner, Link, AlertDialog, AlertDialogBody, AlertDialogFooter, AlertDialogHeader, AlertDialogContent, AlertDialogOverlay, useDisclosure } from '@chakra-ui/react';
+import { Box, Container, Heading, VStack, Text, Button, HStack, Image, Icon, Spinner, Link, AlertDialog, AlertDialogBody, AlertDialogFooter, AlertDialogHeader, AlertDialogContent, AlertDialogOverlay, useDisclosure, useToast } from '@chakra-ui/react';
 import { useUserGlobal } from '../global/user';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { FaHeart, FaRegHeart, FaTrash } from 'react-icons/fa';
+import { FaRegThumbsDown, FaTrash } from 'react-icons/fa';
 
 const AccPage = () => {
     const { currentUser, setCurrentUser } = useUserGlobal();
@@ -13,6 +13,7 @@ const AccPage = () => {
     const [postToDelete, setPostToDelete] = useState(null);
     const { isOpen, onOpen, onClose } = useDisclosure();
     const cancelRef = React.useRef();
+    const toast = useToast();
 
     useEffect(() => {
         if (!currentUser) {
@@ -48,6 +49,13 @@ const AccPage = () => {
 
     const handleLogout = () => {
         setCurrentUser(null);
+        toast({
+            title: "Logged out",
+            description: "You have been successfully logged out",
+            status: "info",
+            duration: 3000,
+            isClosable: true,
+        });
         navigate('/login');
     };
 
@@ -70,6 +78,13 @@ const AccPage = () => {
             if (data.success) {
                 setUserPosts(posts => posts.map(post => {
                     if (post._id === postId) {
+                        const isNowLiked = data.data.likes.includes(currentUser._id);
+                        toast({
+                            title: isNowLiked ? "Post liked" : "Post unliked",
+                            status: "success",
+                            duration: 2000,
+                            isClosable: true,
+                        });
                         return {
                             ...post,
                             ...data.data,
@@ -79,9 +94,24 @@ const AccPage = () => {
                     }
                     return post;
                 }));
+            } else {
+                toast({
+                    title: "Error",
+                    description: data.message || "Failed to update like",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
             }
         } catch (error) {
             console.error('Error liking post:', error);
+            toast({
+                title: "Error",
+                description: "Failed to update like. Please try again.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
         } finally {
             setLikingInProgress(prev => ({ ...prev, [postId]: false }));
         }
@@ -111,13 +141,31 @@ const AccPage = () => {
     
             if (data.success) {
                 setUserPosts(posts => posts.filter(post => post._id !== postToDelete._id));
+                toast({
+                    title: "Post deleted",
+                    description: "Your post has been successfully deleted",
+                    status: "success",
+                    duration: 3000,
+                    isClosable: true,
+                });
             } else {
-                console.error('Failed to delete post:', data.message);
-                alert(data.message || 'Failed to delete post');
+                toast({
+                    title: "Delete failed",
+                    description: data.message || "Failed to delete post",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
             }
         } catch (error) {
             console.error('Error deleting post:', error);
-            alert('Failed to delete post. Please try again later.');
+            toast({
+                title: "Error",
+                description: "An error occurred while deleting the post. Please try again.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
         } finally {
             setPostToDelete(null);
             onClose();
@@ -286,7 +334,7 @@ const AccPage = () => {
                                             transition="all 0.2s"
                                         >
                                             <Icon
-                                                as={isPostLiked(post) ? FaHeart : FaRegHeart}
+                                                as={isPostLiked(post) ? FaRegThumbsDown : FaRegThumbsDown}
                                                 boxSize="24px"
                                                 color={isPostLiked(post) ? "red.500" : "gray.400"}
                                             />
