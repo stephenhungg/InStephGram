@@ -230,10 +230,39 @@ export const updatePost = async (req, res) => {
 
 export const deletePost = async (req, res) => {
     const {id} = req.params;
+    const userId = req.query.userId;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ success: false, message: "Invalid post ID format" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ success: false, message: "Invalid user ID format" });
+    }
+
     try {
+        // Find the post first to verify ownership
+        const post = await Post.findById(id);
+        if (!post) {
+            return res.status(404).json({ success: false, message: "Post not found" });
+        }
+
+        // Verify post ownership
+        if (post.userId.toString() !== userId) {
+            return res.status(403).json({ success: false, message: "Not authorized to delete this post" });
+        }
+
+        // Delete the post
         await Post.findByIdAndDelete(id);
-        res.status(200).json({ success: true, message: "Post deleted" });
+
+        // Remove post reference from user's posts array
+        await User.findByIdAndUpdate(userId, {
+            $pull: { posts: id }
+        });
+
+        res.status(200).json({ success: true, message: "Post deleted successfully" });
     } catch (error) {
+        console.error("Error in deletePost:", error);
         res.status(500).json({ success: false, message: "Server Error"});
     }
 }
@@ -356,3 +385,24 @@ export const getPostsByUserId = async (req, res) => {
         res.status(500).json({ success: false, message: "Server Error"});
     }
 }
+
+export const getPostById = async (req, res) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ success: false, message: "Invalid post ID format" });
+    }
+
+    try {
+        const post = await Post.findById(id);
+        
+        if (!post) {
+            return res.status(404).json({ success: false, message: "Post not found" });
+        }
+
+        res.status(200).json({ success: true, data: post });
+    } catch (error) {
+        console.error("Error fetching post:", error);
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};

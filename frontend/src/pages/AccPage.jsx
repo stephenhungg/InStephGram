@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Container, Heading, VStack, Text, Button, HStack, Image, Icon, Spinner, Link } from '@chakra-ui/react';
+import { Box, Container, Heading, VStack, Text, Button, HStack, Image, Icon, Spinner, Link, AlertDialog, AlertDialogBody, AlertDialogFooter, AlertDialogHeader, AlertDialogContent, AlertDialogOverlay, useDisclosure } from '@chakra-ui/react';
 import { useUserGlobal } from '../global/user';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { FaHeart, FaRegHeart, FaTrash } from 'react-icons/fa';
@@ -10,6 +10,9 @@ const AccPage = () => {
     const [userPosts, setUserPosts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [likingInProgress, setLikingInProgress] = useState({});
+    const [postToDelete, setPostToDelete] = useState(null);
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const cancelRef = React.useRef();
 
     useEffect(() => {
         if (!currentUser) {
@@ -88,9 +91,16 @@ const AccPage = () => {
         return post.likes?.some(likeId => likeId === currentUser?._id);
     };
 
-    const handleDelete = async (postId) => {
+    const handleDeleteClick = (post) => {
+        setPostToDelete(post);
+        onOpen();
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!postToDelete) return;
+
         try {
-            const response = await fetch(`/api/posts/${postId}`, {
+            const response = await fetch(`/api/posts/${postToDelete._id}?userId=${currentUser._id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -100,12 +110,17 @@ const AccPage = () => {
             const data = await response.json();
     
             if (data.success) {
-                setUserPosts(posts => posts.filter(post => post._id !== postId));
+                setUserPosts(posts => posts.filter(post => post._id !== postToDelete._id));
             } else {
-                console.error('Failed to delete post:', data.message || data);
+                console.error('Failed to delete post:', data.message);
+                alert(data.message || 'Failed to delete post');
             }
         } catch (error) {
             console.error('Error deleting post:', error);
+            alert('Failed to delete post. Please try again later.');
+        } finally {
+            setPostToDelete(null);
+            onClose();
         }
     };
 
@@ -283,7 +298,9 @@ const AccPage = () => {
                                                 {post.likesCount || 0}
                                             </Text>
                                         </Button>
-                                        <Button onClick={() => handleDelete(post._id)}> <Icon as={FaTrash} boxSize="24px" color="gray.400" /> </Button>
+                                        <Button onClick={() => handleDeleteClick(post)}> 
+                                            <Icon as={FaTrash} boxSize="24px" color="gray.400" /> 
+                                        </Button>
                                     </HStack>
                                     <Text color="white" mt={2}>
                                         {post.caption}
@@ -294,6 +311,33 @@ const AccPage = () => {
                     </VStack>
                 )}
             </VStack>
+
+            <AlertDialog
+                isOpen={isOpen}
+                leastDestructiveRef={cancelRef}
+                onClose={onClose}
+            >
+                <AlertDialogOverlay>
+                    <AlertDialogContent bg="gray.800" color="white">
+                        <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                            Delete Post
+                        </AlertDialogHeader>
+
+                        <AlertDialogBody>
+                            Are you sure you want to delete this post? This action cannot be undone.
+                        </AlertDialogBody>
+
+                        <AlertDialogFooter>
+                            <Button ref={cancelRef} onClick={onClose} variant="ghost" _hover={{ bg: 'whiteAlpha.200' }}>
+                                Cancel
+                            </Button>
+                            <Button colorScheme="red" onClick={handleDeleteConfirm} ml={3}>
+                                Delete
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
         </Container>
     );
 };

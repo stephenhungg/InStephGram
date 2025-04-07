@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import userRoutes from "./routes/user.route.js"; 
 import postRoutes from "./routes/post.route.js";
 import uploadRoutes from "./routes/upload.route.js";
+import commentRoutes from './routes/comment.route.js';
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ app.use(express.json()); //accept json data in body
 
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/posts", commentRoutes);
 app.use("/api/upload", uploadRoutes);
 
 // Serve static files from the React app in production
