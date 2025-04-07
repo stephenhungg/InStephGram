@@ -89,11 +89,23 @@ const AccPage = () => {
     };
 
     const handleDelete = async (postId) => {
-        const response = await apiRequest(`/api/posts/${postId}`, {
-            method: 'DELETE',
-        });
-        if (response.success) {
-            setUserPosts(posts => posts.filter(post => post._id !== postId));
+        try {
+            const response = await fetch(`/api/posts/${postId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+    
+            const data = await response.json();
+    
+            if (data.success) {
+                setUserPosts(posts => posts.filter(post => post._id !== postId));
+            } else {
+                console.error('Failed to delete post:', data.message || data);
+            }
+        } catch (error) {
+            console.error('Error deleting post:', error);
         }
     };
 
