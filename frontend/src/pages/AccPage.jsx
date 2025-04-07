@@ -88,6 +88,15 @@ const AccPage = () => {
         return post.likes?.some(likeId => likeId === currentUser?._id);
     };
 
+    const handleDelete = async (postId) => {
+        const response = await apiRequest(`/api/posts/${postId}`, {
+            method: 'DELETE',
+        });
+        if (response.success) {
+            setUserPosts(posts => posts.filter(post => post._id !== postId));
+        }
+    };
+
     if (!currentUser) {
         return null;
     }
@@ -262,6 +271,7 @@ const AccPage = () => {
                                                 {post.likesCount || 0}
                                             </Text>
                                         </Button>
+                                        <Button onClick={() => handleDelete(post._id)}> <Icon as={FaTrash} boxSize="24px" color="gray.400" /> </Button>
                                     </HStack>
                                     <Text color="white" mt={2}>
                                         {post.caption}
