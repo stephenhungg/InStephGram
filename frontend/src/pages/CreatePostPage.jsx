@@ -22,7 +22,17 @@ const CreatePostPage = () => {
     const {createPost} = usePostGlobal();
 
     const handleAddPost = async() => {
-        if (!newPost.title || !newPost.caption || !newPost.userId || !imageFile) {
+        if (!newPost.userId){
+            toast({
+                title: "Missing fields",
+                description: "Please log in to create a post",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+            return;
+        }
+        else if (!newPost.title || !newPost.caption || !imageFile) {
             toast({
                 title: "Missing fields",
                 description: "Please fill in all fields and select an image",
