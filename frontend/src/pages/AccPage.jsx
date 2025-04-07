@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Container, Heading, VStack, Text, Button, HStack, Image, Icon, Spinner, Link, AlertDialog, AlertDialogBody, AlertDialogFooter, AlertDialogHeader, AlertDialogContent, AlertDialogOverlay, useDisclosure, useToast } from '@chakra-ui/react';
 import { useUserGlobal } from '../global/user';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { FaRegThumbsDown, FaTrash } from 'react-icons/fa';
+import { FaRegThumbsDown, FaTrash, FaThumbsDown } from 'react-icons/fa';
 
 const AccPage = () => {
     const { currentUser, setCurrentUser } = useUserGlobal();
@@ -334,7 +334,7 @@ const AccPage = () => {
                                             transition="all 0.2s"
                                         >
                                             <Icon
-                                                as={isPostLiked(post) ? FaRegThumbsDown : FaRegThumbsDown}
+                                                as={isPostLiked(post) ? FaThumbsDown : FaRegThumbsDown}
                                                 boxSize="24px"
                                                 color={isPostLiked(post) ? "red.500" : "gray.400"}
                                             />

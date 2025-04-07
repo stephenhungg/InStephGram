@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, VStack, Link, Text, Box, Image, Heading, Button, HStack, Icon } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
-import { FaRegThumbsDown } from 'react-icons/fa';
+import { FaRegThumbsDown, FaThumbsDown } from 'react-icons/fa';
 import { useUserGlobal } from '../global/user';
 import { apiRequest } from '../utils/api';
 
@@ -193,7 +193,7 @@ const HomePage = () => {
                                             p={2}
                                         >
                                             <Icon
-                                                as={isPostLiked(post) ? FaRegThumbsDown : FaRegThumbsDown}
+                                                as={isPostLiked(post) ? FaThumbsDown : FaRegThumbsDown}
                                                 boxSize="24px"
                                                 color={isPostLiked(post) ? "red.500" : "gray.400"}
                                             />
