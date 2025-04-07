@@ -1,79 +1,58 @@
 import React from 'react'
-import { Container, Flex, Text, HStack, Button, Box } from "@chakra-ui/react"
-import { Link, useNavigate } from "react-router-dom"
+import { Container, Flex, Text, HStack, Button } from "@chakra-ui/react"
+import { Link } from "react-router-dom"
 import { FaPlusSquare, FaUserCircle, FaTrophy } from "react-icons/fa"
 import { useUserGlobal } from '../global/user'
-import { RouterLink } from 'react-router-dom'
 
 const NavBar = () => {
-  const { currentUser, setCurrentUser } = useUserGlobal()
-  const navigate = useNavigate()
+    const { currentUser, setCurrentUser } = useUserGlobal()
 
-  return (
-    <Box bg="whiteAlpha.200" px={4} py={2}>
-      <Flex h={16} alignItems="center" justifyContent="space-between">
-        <HStack spacing={8} alignItems="center">
-          <Link as={RouterLink} to="/" color="white" fontWeight="bold" fontSize="xl">
-            InStephGram
-          </Link>
-          <HStack as="nav" spacing={4} display={{ base: "none", md: "flex" }}>
-            <Link as={RouterLink} to="/" color="white" _hover={{ color: "blue.400" }}>
-              Home
-            </Link>
-            <Link as={RouterLink} to="/about" color="white" _hover={{ color: "blue.400" }}>
-              About
-            </Link>
-            <Link as={RouterLink} to="/technical" color="white" _hover={{ color: "blue.400" }}>
-              Technical Overview
-            </Link>
-            {currentUser && (
-              <Link as={RouterLink} to="/post" color="white" _hover={{ color: "blue.400" }}>
-                Create Post
-              </Link>
-            )}
-          </HStack>
-        </HStack>
+    const handleLogout = () => {
+        setCurrentUser(null)
+    }
 
-        <HStack spacing={4}>
-          {currentUser ? (
-            <>
-              <Link as={RouterLink} to="/acc" color="white" _hover={{ color: "blue.400" }}>
-                Account
-              </Link>
-              <Button
-                colorScheme="red"
-                size="sm"
-                onClick={() => {
-                  setCurrentUser(null)
-                  navigate('/login')
-                }}
-              >
-                Logout
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                colorScheme="blue"
-                size="sm"
-                onClick={() => navigate('/login')}
-              >
-                Login
-              </Button>
-              <Button
-                variant="outline"
-                colorScheme="whiteAlpha"
-                size="sm"
-                onClick={() => navigate('/create')}
-              >
-                Sign Up
-              </Button>
-            </>
-          )}
-        </HStack>
-      </Flex>
-    </Box>
-  )
+    return (<Container maxW={"1140px"} px={4} >
+        <Flex 
+            h={16}
+            alignItems="center"
+            justifyContent={"space-between"}
+            flexDir={{
+                base:'column',
+                sm:"row"
+            }}
+        >
+            <Text fontSize={{base:"22", sm:"28"}} fontWeight={"bold"} textAlign={"center"} bgClip={"text"} color="white">
+                <Link to={"/"}>InStephGram</Link>
+            </Text>
+            <HStack spacing={2} alignItems={"center"}>
+                <Link to={"/about"}>
+                    <Button _hover={{ transform: 'scale(1.02)' }}
+                            transition="all 0.2s">
+                        About
+                    </Button>
+                </Link>
+                <Link to={"/acc"}>
+                    <Button _hover={{ transform: 'scale(1.02)' }}
+                            transition="all 0.2s">
+                        <FaUserCircle fontSize={20} />
+                    </Button>
+                </Link>
+                <Link to={"/post"}>
+                    <Button _hover={{ transform: 'scale(1.02)' }}
+                            transition="all 0.2s">
+                        <FaPlusSquare fontSize={20} />
+                    </Button>
+                </Link>
+                <Link to={"/leaderboard"}>
+                    <Button _hover={{ transform: 'scale(1.02)' }}
+                            transition="all 0.2s">
+                        <FaTrophy fontSize={20} />
+                    </Button>
+                </Link>
+            </HStack>
+        </Flex>
+    </Container>
+    )
 }
 
 export default NavBar

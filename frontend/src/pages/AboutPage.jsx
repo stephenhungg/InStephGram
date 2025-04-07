@@ -7,142 +7,133 @@ import {
     VStack,
     HStack,
     Icon,
-    SimpleGrid,
-    useColorModeValue,
+    List,
+    ListItem,
+    ListIcon,
     Divider,
-    Link,
-    Button
+    useColorModeValue,
 } from '@chakra-ui/react';
-import { FaCamera, FaHeart, FaComment, FaUserFriends, FaTrophy } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { FaCamera, FaThumbsDown, FaComment, FaUser, FaLock, FaServer, FaDatabase, FaCloud } from 'react-icons/fa';
 
-const FeatureCard = ({ icon, title, description }) => {
-    const bgColor = useColorModeValue('whiteAlpha.200', 'whiteAlpha.200');
-    const hoverBgColor = useColorModeValue('whiteAlpha.300', 'whiteAlpha.300');
-
-    return (
-        <Box
-            p={6}
-            rounded="lg"
-            bg={bgColor}
-            _hover={{ bg: hoverBgColor, transform: 'translateY(-5px)' }}
-            transition="all 0.3s"
-            height="100%"
-        >
-            <HStack spacing={4} mb={4}>
-                <Icon as={icon} boxSize={6} color="blue.400" />
-                <Heading size="md" color="white">{title}</Heading>
-            </HStack>
+const FeatureItem = ({ icon, title, description }) => (
+    <HStack align="start" spacing={4}>
+        <Icon as={icon} boxSize={6} color="white.400" />
+        <Box>
+            <Text fontWeight="bold" color="white" fontSize="lg">{title}</Text>
             <Text color="gray.300">{description}</Text>
         </Box>
-    );
-};
+    </HStack>
+);
+
+const TechStackItem = ({ icon, title, description }) => (
+    <HStack align="start" spacing={4}>
+        <Icon as={icon} boxSize={6} color="white.400" />
+        <Box>
+            <Text fontWeight="bold" color="white">{title}</Text>
+            <Text color="gray.300" fontSize="sm">{description}</Text>
+        </Box>
+    </HStack>
+);
 
 const AboutPage = () => {
-    const navigate = useNavigate();
     const bgColor = useColorModeValue('whiteAlpha.200', 'whiteAlpha.200');
-
-    const features = [
-        {
-            icon: FaCamera,
-            title: "Share Your Moments",
-            description: "Upload and share your favorite photos with the community. Add captions and titles to tell your story."
-        },
-        {
-            icon: FaRegThumbsDown,
-            title: "Dislike & Interact",
-            description: "Show hatred for posts you despise and see what content resonates (or doesn't) with others."
-        },
-        {
-            icon: FaComment,
-            title: "Join the Conversation",
-            description: "Engage with the community through comments and discussions on posts."
-        },
-        {
-            icon: FaTrophy,
-            title: "Leaderboard",
-            description: "Compete for the top spot on our leaderboard based on your post engagement (dislikes)."
-        }
-    ];
+    const borderColor = useColorModeValue('whiteAlpha.300', 'whiteAlpha.300');
 
     return (
-        <Container maxW="container.xl" py={12}>
-            <VStack spacing={12} align="stretch">
-                {/* Hero Section */}
-                <Box textAlign="center" py={10}>
-                    <Heading
-                        as="h1"
-                        size="2xl"
-                        mb={6}
-                        bgGradient="linear(to-r, blue.400, purple.400)"
-                        bgClip="text"
+        <Container maxW="container.md" py={8}>
+            <VStack spacing={8} align="stretch">
+                {/* Header */}
+                <Box textAlign="center">
+                    <Heading 
+                        as="h1" 
+                        size="2xl" 
+                        bgClip="text" 
+                        color="white"
+                        mb={4}
                     >
-                        Welcome to Our Community
+                        About InStephGram
                     </Heading>
-                    <Text fontSize="xl" color="gray.300" maxW="2xl" mx="auto">
-                        A platform where you can share your moments, connect with others, and discover terrible content.
+                    <Text color="gray.300" fontSize="lg">
+                        A social platform for sharing and connecting with silly visual content
                     </Text>
                 </Box>
 
                 {/* Features Section */}
-                <Box py={8}>
-                    <Heading as="h2" size="xl" mb={8} color="white" textAlign="center">
-                        Features
-                    </Heading>
-                    <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={8}>
-                        {features.map((feature, index) => (
-                            <FeatureCard
-                                key={index}
-                                icon={feature.icon}
-                                title={feature.title}
-                                description={feature.description}
-                            />
-                        ))}
-                    </SimpleGrid>
-                </Box>
-
-                {/* Get Started Section */}
-                <Box
-                    p={8}
-                    rounded="lg"
-                    bg={bgColor}
-                    textAlign="center"
+                <Box 
+                    bg={bgColor} 
+                    p={6} 
+                    rounded="lg" 
+                    borderWidth="1px" 
+                    borderColor={borderColor}
                 >
-                    <Heading as="h2" size="xl" mb={4} color="white">
-                        Ready to Join?
+                    <Heading size="lg" color="white" mb={6}>
+                        Key Features
                     </Heading>
-                    <Text color="gray.300" mb={6}>
-                        Create an account and start sharing your moments with the community.
-                    </Text>
-                    <HStack spacing={4} justify="center">
-                        <Button
-                            colorScheme="blue"
-                            size="lg"
-                            onClick={() => navigate('/create')}
-                        >
-                            Create Account
-                        </Button>
-                        <Button
-                            variant="outline"
-                            colorScheme="whiteAlpha"
-                            size="lg"
-                            onClick={() => navigate('/login')}
-                        >
-                            Login
-                        </Button>
-                    </HStack>
+                    <VStack spacing={6} align="stretch">
+                        <FeatureItem
+                            icon={FaCamera}
+                            title="Image Sharing"
+                            description="Upload and share your favorite images with the community"
+                        />
+                        <FeatureItem
+                            icon={FaThumbsDown}
+                            title="Dislike System"
+                            description="Show disdain for posts you hate with our dislike system"
+                        />
+                        <FeatureItem
+                            icon={FaComment}
+                            title="Comments"
+                            description="Engage with the community through comments on posts"
+                        />
+                        <FeatureItem
+                            icon={FaUser}
+                            title="User Profiles"
+                            description="View and discover other users' personal profile"
+                        />
+                    </VStack>
                 </Box>
 
-                {/* Footer Section */}
-                <Box py={8}>
-                    <Divider mb={8} borderColor="whiteAlpha.300" />
-                    <Text textAlign="center" color="gray.400">
-                        © {new Date().getFullYear()} InStephGram. All rights reserved.
-                    </Text>
-                    <Text textAlign="center" color="gray.400" mt={2}>
-                        Built using React and Chakra UI
-                    </Text>
+                <Divider borderColor={borderColor} />
+
+                {/* Technical Overview */}
+                <Box 
+                    bg={bgColor} 
+                    p={6} 
+                    rounded="lg" 
+                    borderWidth="1px" 
+                    borderColor={borderColor}
+                >
+                    <Heading size="lg" color="white" mb={6}>
+                        Technical Overview
+                    </Heading>
+                    <VStack spacing={6} align="stretch">
+                        <TechStackItem
+                            icon={FaServer}
+                            title="Frontend"
+                            description="Built with React.js, Chakra UI for styling, and React Router for navigation"
+                        />
+                        <TechStackItem
+                            icon={FaServer}
+                            title="Backend"
+                            description="Node.js with Express.js, providing RESTful API endpoints"
+                        />
+                        <TechStackItem
+                            icon={FaDatabase}
+                            title="Database"
+                            description="MongoDB for storing user data, posts, and comments"
+                        />
+                        <TechStackItem
+                            icon={FaCloud}
+                            title="Storage"
+                            description="AWS S3 for secure and scalable image storage"
+                        />
+                    </VStack>
                 </Box>
+
+                {/* Footer */}
+                <Text color="gray.400" textAlign="center" fontSize="sm">
+                    © {new Date().getFullYear()} InStephGram. All rights reserved.
+                </Text>
             </VStack>
         </Container>
     );
