@@ -1,31 +1,31 @@
 import React, { useState } from 'react';
-import { Box, Button, Container, FormControl, FormLabel, Heading, Input, VStack, Text, Link, useToast } from '@chakra-ui/react';
+import { Box, Button, Container, Heading, Input, VStack, Text, Link, useToast } from '@chakra-ui/react';
 import { useUserGlobal } from '../global/user';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 
 const LoginPage = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const [credentials, setCredentials] = useState({
+        username: "",
+        password: "",   
+    });
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const { setCurrentUser } = useUserGlobal();
     const toast = useToast();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleLogin = async () => {
         setIsLoading(true);
-
         try {
-            const response = await fetch("/api/users/login", {
-                method: "POST",
+            const response = await fetch('/api/users/login', {
+                method: 'POST',
                 headers: {
-                    "Content-Type": "application/json",
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify(credentials)
             });
 
             const data = await response.json();
-
+            
             if (data.success) {
                 setCurrentUser(data.data);
                 toast({
@@ -35,18 +35,18 @@ const LoginPage = () => {
                     duration: 3000,
                     isClosable: true,
                 });
-                navigate("/");
+                navigate('/');
             } else {
                 toast({
                     title: "Login failed",
-                    description: data.message || "Invalid email or password",
+                    description: data.message || "Invalid username or password",
                     status: "error",
                     duration: 5000,
                     isClosable: true,
                 });
             }
         } catch (error) {
-            console.error("Login error:", error);
+            console.error('Login error:', error);
             toast({
                 title: "Error",
                 description: "An error occurred while logging in. Please try again.",
@@ -60,52 +60,66 @@ const LoginPage = () => {
     };
 
     return (
-        <Container maxW="container.sm" py={8}>
+        <Container maxW={"container.sm"}>
             <VStack spacing={8}>
-                <Heading color="white">Login</Heading>
-                <Box w="100%" bg="whiteAlpha.200" p={8} rounded="lg" as="form" onSubmit={handleSubmit}>
+                <Heading as={"h1"} size={"2xl"} textAlign={"center"} mb={8} bgClip="text" color="white">
+                    Login
+                </Heading>
+                <Box w={"full"} p={6} rounded={"lg"} shadow={"md"} bg="whiteAlpha.200" backdropFilter="blur(10px)">
                     <VStack spacing={4}>
-                        <FormControl>
-                            <FormLabel color="gray.300">Email</FormLabel>
-                            <Input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                bg="whiteAlpha.100"
-                                color="white"
-                                _hover={{ bg: "whiteAlpha.200" }}
-                                _focus={{ bg: "whiteAlpha.200", borderColor: "blue.300" }}
-                            />
-                        </FormControl>
-                        <FormControl>
-                            <FormLabel color="gray.300">Password</FormLabel>
-                            <Input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                bg="whiteAlpha.100"
-                                color="white"
-                                _hover={{ bg: "whiteAlpha.200" }}
-                                _focus={{ bg: "whiteAlpha.200", borderColor: "blue.300" }}
-                            />
-                        </FormControl>
-                        <Button
-                            type="submit"
-                            colorScheme="blue"
-                            w="100%"
+                        <Input 
+                            placeholder='Username' 
+                            type="text"
+                            value={credentials.username} 
+                            onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+                            size="lg"
+                            variant="filled"
+                            bg="whiteAlpha.300"
+                            color="white"
+                            _placeholder={{ color: "gray.400" }}
+                            _hover={{ bg: "whiteAlpha.400" }}
+                            _focus={{ 
+                                bg: "whiteAlpha.500",
+                                borderColor: "whiteAlpha.500"
+                            }}
+                        />
+                        <Input 
+                            placeholder='Password' 
+                            type="password"
+                            value={credentials.password} 
+                            onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+                            size="lg"
+                            variant="filled"
+                            bg="whiteAlpha.300"
+                            color="white"
+                            _placeholder={{ color: "gray.400" }}
+                            _hover={{ bg: "whiteAlpha.400" }}
+                            _focus={{ 
+                                bg: "whiteAlpha.500",
+                                borderColor: "whiteAlpha.500"
+                            }}
+                        />
+                        <Button 
+                            onClick={handleLogin} 
+                            w='full'
+                            size="lg"
                             isLoading={isLoading}
-                            loadingText="Logging in"
+                            loadingText="Logging in..."
+                            _hover={{ transform: 'scale(1.02)' }}
+                            transition="all 0.2s"
+                            bg="whiteAlpha.500"
+                            colorScheme="whiteAlpha"
                         >
                             Login
                         </Button>
+                        <Text textAlign="center" mt={4}>
+                            Don't have an account?{" "}
+                            <Link as={RouterLink} to="/create" color="blue.500" fontWeight="bold">
+                                Create one
+                            </Link>
+                        </Text>
                     </VStack>
                 </Box>
-                <Text textAlign="center" mt={4}>
-                    Don't have an account?{" "}
-                    <Link as={RouterLink} to="/create" color="blue.500" fontWeight="bold">
-                        Create one
-                    </Link>
-                </Text>
             </VStack>
         </Container>
     );
