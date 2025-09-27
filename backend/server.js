@@ -12,7 +12,7 @@ dotenv.config();
 
 const app = express();
 
-// Connect to database for serverless functions
+// Connect to database (for both serverless and local)
 connectDB();
 
 // CORS configuration - more permissive for Vercel
@@ -51,7 +51,6 @@ export default app;
 if (process.env.NODE_ENV !== 'production') {
     const PORT = process.env.PORT || 3001;
     app.listen(PORT, () => {
-        connectDB();
         console.log(`Server started at http://localhost:${PORT}`);
     });
 }
