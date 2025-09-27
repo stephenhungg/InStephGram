@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Container, Heading, VStack, HStack, Text, Badge, Avatar, Spinner, Link } from '@chakra-ui/react';
 import { useUserGlobal } from '../global/user';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { API_BASE_URL } from '../config/api';
 
 const LeaderboardPage = () => {
     const { currentUser } = useUserGlobal();
@@ -17,7 +18,7 @@ const LeaderboardPage = () => {
 
         const fetchLeaderboard = async () => {
             try {
-                const response = await fetch('/api/users/leaderboard');
+                const response = await fetch(`${API_BASE_URL}/api/users/leaderboard`);
                 const data = await response.json();
                 if (data.success) {
                     setLeaderboardData(data.data);

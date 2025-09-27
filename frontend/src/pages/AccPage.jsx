@@ -24,7 +24,7 @@ const AccPage = () => {
 
         const fetchUserPosts = async () => {
             try {
-                const response = await fetch('/api/posts');
+                const response = await fetch(`${API_BASE_URL}/api/posts`);
                 const data = await response.json();
                 if (data.success) {
                     // Filter posts by current user and sort by date
