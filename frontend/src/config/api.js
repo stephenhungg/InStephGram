@@ -1,9 +1,9 @@
 const getApiBaseUrl = () => {
   if (import.meta.env.PROD) {
-    // In production, use the same domain as the frontend
-    return '';
+    // In production, use your Render backend URL
+    return import.meta.env.VITE_API_URL || 'https://your-backend-app.onrender.com';
   }
-  // In development, use the Vite proxy (which points to localhost:5000)
+  // In development, use the local backend
   return 'http://localhost:5000';
 };
 

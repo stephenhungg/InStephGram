@@ -2,16 +2,8 @@
 # exit on error
 set -o errexit
 
-# Install dependencies for backend
+# Install dependencies for backend only (frontend will be deployed separately on Vercel)
 cd backend
 npm install
-
-# Return to root and install frontend dependencies
-cd ..
-cd frontend
-npm install
-
-# Build frontend
-npm run build
 
 # Return to root 
