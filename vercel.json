@@ -5,6 +5,7 @@
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
       "config": {
+        "buildCommand": "npm run build",
         "distDir": "dist"
       }
     },
@@ -24,10 +25,6 @@
     }
   ],
   "env": {
-    "MONGO_URI": "@mongo_uri",
-    "AWS_ACCESS_KEY_ID": "@aws_access_key_id", 
-    "AWS_SECRET_ACCESS_KEY": "@aws_secret_access_key",
-    "AWS_REGION": "@aws_region",
-    "S3_BUCKET_NAME": "@s3_bucket_name"
+    "NODE_ENV": "production"
   }
 }
