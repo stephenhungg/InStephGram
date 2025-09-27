@@ -12,6 +12,9 @@ dotenv.config();
 
 const app = express();
 
+// Connect to database for serverless functions
+connectDB();
+
 // CORS configuration - more permissive for Vercel
 const corsOptions = {
   origin: true, // Allow all origins since we're on same domain in production
