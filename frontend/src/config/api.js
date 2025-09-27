@@ -4,7 +4,7 @@ const getApiBaseUrl = () => {
     return '';
   }
   // In development, use the local backend
-  return 'http://localhost:5000';
+  return 'http://localhost:3001';
 };
 
 export const API_BASE_URL = getApiBaseUrl(); 

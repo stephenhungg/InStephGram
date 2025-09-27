@@ -137,7 +137,12 @@ export const getPost = async (req, res) => {
         res.status(200).json({ success: true, data: posts });
     } catch (error) {
         console.log("Error in fetching posts: ", error.message);
-        res.status(500).json({ success: false, message: "Server Error"});
+        // If database is not connected, return empty array
+        if (error.name === 'MongooseError' || error.message.includes('connection')) {
+            res.status(200).json({ success: true, data: [] });
+        } else {
+            res.status(500).json({ success: false, message: "Server Error"});
+        }
     }
 }
 

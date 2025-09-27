@@ -46,7 +46,7 @@ export default app;
 
 // For local development
 if (process.env.NODE_ENV !== 'production') {
-    const PORT = process.env.PORT || 5000;
+    const PORT = process.env.PORT || 3001;
     app.listen(PORT, () => {
         connectDB();
         console.log(`Server started at http://localhost:${PORT}`);
