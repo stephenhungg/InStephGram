@@ -11,15 +11,10 @@ import commentRoutes from './routes/comment.route.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-// CORS configuration for cross-origin requests
+// CORS configuration - more permissive for Vercel
 const corsOptions = {
-  origin: [
-    'http://localhost:3000', // Local development
-    'http://localhost:5173', // Vite dev server
-    'https://instephgram.vercel.app' // Replace with your actual Vercel URL
-  ],
+  origin: true, // Allow all origins since we're on same domain in production
   credentials: true,
   optionsSuccessStatus: 200
 };
@@ -46,7 +41,14 @@ app.get('/', (req, res) => {
     });
 });
 
-app.listen(PORT, () => {
-    connectDB();
-    console.log(`Server started at http://localhost:${PORT}`);
-});
+// For Vercel serverless
+export default app;
+
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+        connectDB();
+        console.log(`Server started at http://localhost:${PORT}`);
+    });
+}

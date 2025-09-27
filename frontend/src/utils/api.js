@@ -2,7 +2,6 @@ import { API_BASE_URL } from '../config/api';
 
 export const apiRequest = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
-  console.log('🌐 Making API request to:', url);
   
   try {
     const response = await fetch(url, {
@@ -13,11 +12,7 @@ export const apiRequest = async (endpoint, options = {}) => {
       },
     });
 
-    console.log('📡 Response status:', response.status);
-    console.log('📡 Response content-type:', response.headers.get('content-type'));
-    
     const data = await response.json();
-    console.log('📡 Response data:', data);
     
     if (!response.ok) {
       throw new Error(data.message || 'API request failed');

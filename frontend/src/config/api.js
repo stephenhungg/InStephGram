@@ -1,12 +1,10 @@
 const getApiBaseUrl = () => {
-  // Force production mode for debugging
-  const url = 'https://instephgram.onrender.com';
-  console.log('🚀 FORCING BACKEND URL:', url);
-  console.log('🔍 Current environment:', import.meta.env.MODE);
-  console.log('🔍 Is production:', import.meta.env.PROD);
-  console.log('🔍 VITE_API_URL env var:', import.meta.env.VITE_API_URL);
-  return url;
+  if (import.meta.env.PROD) {
+    // In production on Vercel, use same domain (no CORS issues!)
+    return '';
+  }
+  // In development, use the local backend
+  return 'http://localhost:5000';
 };
 
-export const API_BASE_URL = getApiBaseUrl();
-console.log('🎯 FINAL API_BASE_URL:', API_BASE_URL); 
+export const API_BASE_URL = getApiBaseUrl(); 
