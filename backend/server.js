@@ -18,7 +18,7 @@ const corsOptions = {
   origin: [
     'http://localhost:3000', // Local development
     'http://localhost:5173', // Vite dev server
-    'https://your-frontend-app.vercel.app' // Your Vercel app URL
+    'https://instephgram.vercel.app' // Replace with your actual Vercel URL
   ],
   credentials: true,
   optionsSuccessStatus: 200
