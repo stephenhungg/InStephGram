@@ -3,6 +3,7 @@ import { Box, Container, Heading, VStack, Text, Button, HStack, Image, Icon, Spi
 import { useUserGlobal } from '../global/user';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { FaRegThumbsDown, FaTrash, FaThumbsDown } from 'react-icons/fa';
+import { API_BASE_URL } from '../config/api';
 
 const AccPage = () => {
     const { currentUser, setCurrentUser } = useUserGlobal();
@@ -65,7 +66,7 @@ const AccPage = () => {
         try {
             setLikingInProgress(prev => ({ ...prev, [postId]: true }));
 
-            const response = await fetch(`/api/posts/${postId}/like`, {
+            const response = await fetch(`${API_BASE_URL}/api/posts/${postId}/like`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -130,7 +131,7 @@ const AccPage = () => {
         if (!postToDelete) return;
 
         try {
-            const response = await fetch(`/api/posts/${postToDelete._id}?userId=${currentUser._id}`, {
+            const response = await fetch(`${API_BASE_URL}/api/posts/${postToDelete._id}?userId=${currentUser._id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',

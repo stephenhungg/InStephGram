@@ -1,4 +1,5 @@
 import {create} from "zustand"
+import { API_BASE_URL } from '../config/api';
 
 export const useUserGlobal = create((set) => ({
     users: [],
@@ -9,7 +10,7 @@ export const useUserGlobal = create((set) => ({
         if (!newUser.username || !newUser.email || !newUser.password) {
             return {success: false, message: "Please fill in all fields"};
         }
-        const res = await fetch("/api/users", {
+        const res = await fetch(`${API_BASE_URL}/api/users`, {
             method:"POST",
             headers: {
                 "Content-Type": "application/json"
@@ -22,7 +23,7 @@ export const useUserGlobal = create((set) => ({
     },
     login: async (credentials) => {
         try {
-            const res = await fetch("/api/auth/login", {
+            const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

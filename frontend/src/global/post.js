@@ -1,4 +1,5 @@
 import {create} from "zustand"
+import { API_BASE_URL } from '../config/api';
 
 export const usePostGlobal = create((set) => ({
     posts: [],
@@ -9,7 +10,7 @@ export const usePostGlobal = create((set) => ({
         }
         try {
             console.log("Sending post data to API:", newPost);
-            const res = await fetch("/api/posts", {
+            const res = await fetch(`${API_BASE_URL}/api/posts`, {
                 method:"POST",
                 headers: {
                     "Content-Type": "application/json"

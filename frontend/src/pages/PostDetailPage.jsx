@@ -18,6 +18,7 @@ import {
     Spinner
 } from '@chakra-ui/react';
 import { useUserGlobal } from '../global/user';
+import { API_BASE_URL } from '../config/api';
 
 const PostDetailPage = () => {
     const { postId } = useParams();
@@ -33,7 +34,7 @@ const PostDetailPage = () => {
         const fetchPostAndComments = async () => {
             try {
                 // Fetch post details
-                const postResponse = await fetch(`/api/posts/${postId}`);
+                const postResponse = await fetch(`${API_BASE_URL}/api/posts/${postId}`);
                 const postData = await postResponse.json();
                 
                 if (postData.success) {
@@ -41,7 +42,7 @@ const PostDetailPage = () => {
                 }
 
                 // Fetch comments
-                const commentsResponse = await fetch(`/api/posts/${postId}/comments`);
+                const commentsResponse = await fetch(`${API_BASE_URL}/api/posts/${postId}/comments`);
                 const commentsData = await commentsResponse.json();
                 
                 if (commentsData.success) {
@@ -69,7 +70,7 @@ const PostDetailPage = () => {
 
         setIsSubmitting(true);
         try {
-            const response = await fetch(`/api/posts/${postId}/comments`, {
+            const response = await fetch(`${API_BASE_URL}/api/posts/${postId}/comments`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

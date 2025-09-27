@@ -3,6 +3,7 @@ import { Container, VStack, Link, Text, Box, Image, Heading, Button, HStack, Ico
 import { Link as RouterLink, useParams, useNavigate } from 'react-router-dom';
 import { FaRegThumbsDown, FaThumbsDown } from 'react-icons/fa';
 import { useUserGlobal } from '../global/user';
+import { API_BASE_URL } from '../config/api';
 
 const UserProfilePage = () => {
     const [posts, setPosts] = useState([]);
@@ -20,7 +21,7 @@ const UserProfilePage = () => {
             setError(null);
             try {
                 // First fetch the user profile
-                const userResponse = await fetch(`/api/users/profile/${username}`);
+                const userResponse = await fetch(`${API_BASE_URL}/api/users/profile/${username}`);
                 if (!userResponse.ok) {
                     throw new Error('Failed to fetch user profile');
                 }
@@ -30,7 +31,7 @@ const UserProfilePage = () => {
                     setProfileUser(userData.data);
                     
                     // Then fetch their posts
-                    const postsResponse = await fetch(`/api/posts/user/${userData.data._id}`);
+                    const postsResponse = await fetch(`${API_BASE_URL}/api/posts/user/${userData.data._id}`);
                     if (!postsResponse.ok) {
                         throw new Error('Failed to fetch user posts');
                     }
@@ -70,7 +71,7 @@ const UserProfilePage = () => {
         try {
             setLikingInProgress(prev => ({ ...prev, [postId]: true }));
 
-            const response = await fetch(`/api/posts/${postId}/like`, {
+            const response = await fetch(`${API_BASE_URL}/api/posts/${postId}/like`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
