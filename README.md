@@ -97,15 +97,6 @@ The application is configured for separate deployments:
 4. **Climb the Leaderboard**: Compete to be the most disliked user
 5. **Comment**: Engage with other terrible content
 
-## 🚀 Live Demo
-
-- **Frontend**: [Your Vercel URL]
-- **Backend**: [Your Render URL]
-
-## 📱 Screenshots
-
-*Add screenshots of your app here*
-
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -120,4 +111,4 @@ This project is licensed under the MIT License.
 
 ---
 
-Built with ❤️ and a lot of ☕ by [Your Name]
+Built with ❤️ and a lot of ☕ by stephen hung
