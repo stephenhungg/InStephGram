@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, Container, Heading, Input, VStack, Image, IconButton, Text, Icon, useToast } from '@chakra-ui/react';
+import { Box, Button, Container, Heading, Input, VStack, Image, IconButton, Text, Icon, useToast, Progress } from '@chakra-ui/react';
 import { LuUpload, LuX } from "react-icons/lu"
 import { usePostGlobal } from '../global/post';
 import { useUserGlobal } from '../global/user';
@@ -20,6 +20,7 @@ const CreatePostPage = () => {
     const [imageFile, setImageFile] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState("");
+    const [uploadProgress, setUploadProgress] = useState(0);
     const {createPost} = usePostGlobal();
 
     const loadingMessages = [
@@ -48,6 +49,7 @@ const CreatePostPage = () => {
         }
 
         setIsLoading(true);
+        setUploadProgress(0);
         
         // Start cycling through random loading messages
         const getRandomMessage = () => {
@@ -60,6 +62,14 @@ const CreatePostPage = () => {
         
         // Change message every 2 seconds
         const messageInterval = setInterval(getRandomMessage, 2000);
+        
+        // Simulate progress bar
+        const progressInterval = setInterval(() => {
+            setUploadProgress(prev => {
+                if (prev >= 95) return prev; // Stop at 95% until actual completion
+                return prev + Math.random() * 15; // Random increments
+            });
+        }, 300);
         
         try {
             // Upload image to backend for S3 upload
@@ -83,6 +93,9 @@ const CreatePostPage = () => {
                 });
 
                 if (postResponse.success) {
+                    // Complete the progress bar
+                    setUploadProgress(100);
+                    
                     toast({
                         title: "Post created",
                         description: "Your post has been created successfully",
@@ -120,8 +133,10 @@ const CreatePostPage = () => {
             });
         } finally {
             clearInterval(messageInterval);
+            clearInterval(progressInterval);
             setIsLoading(false);
             setLoadingMessage("");
+            setUploadProgress(0);
         }
     };
 
@@ -309,23 +324,58 @@ const CreatePostPage = () => {
                                 Create Post
                             </Button>
                             
-                            {isLoading && loadingMessage && (
-                                <Text 
-                                    color="blue.300" 
-                                    fontSize="sm" 
-                                    textAlign="center"
-                                    fontStyle="italic"
-                                    opacity={0.8}
-                                    animation="fadeIn 0.5s ease-in-out"
-                                    sx={{
-                                        '@keyframes fadeIn': {
-                                            '0%': { opacity: 0 },
-                                            '100%': { opacity: 0.8 }
-                                        }
-                                    }}
-                                >
-                                    {loadingMessage}
-                                </Text>
+                            {isLoading && (
+                                <VStack spacing={3} w="100%">
+                                    {/* Progress Bar */}
+                                    <Box w="100%">
+                                        <Progress 
+                                            value={uploadProgress} 
+                                            size="lg"
+                                            colorScheme="blue"
+                                            bg="whiteAlpha.200"
+                                            borderRadius="full"
+                                            hasStripe
+                                            isAnimated
+                                            opacity={0}
+                                            animation="fadeIn 0.5s ease-in-out forwards"
+                                            sx={{
+                                                '@keyframes fadeIn': {
+                                                    '0%': { opacity: 0 },
+                                                    '100%': { opacity: 1 }
+                                                }
+                                            }}
+                                        />
+                                        <Text 
+                                            color="blue.200" 
+                                            fontSize="xs" 
+                                            textAlign="center"
+                                            mt={1}
+                                            fontWeight="medium"
+                                        >
+                                            {Math.round(uploadProgress)}%
+                                        </Text>
+                                    </Box>
+                                    
+                                    {/* Loading Message */}
+                                    {loadingMessage && (
+                                        <Text 
+                                            color="blue.300" 
+                                            fontSize="sm" 
+                                            textAlign="center"
+                                            fontStyle="italic"
+                                            opacity={0.8}
+                                            animation="fadeIn 0.5s ease-in-out"
+                                            sx={{
+                                                '@keyframes fadeIn': {
+                                                    '0%': { opacity: 0 },
+                                                    '100%': { opacity: 0.8 }
+                                                }
+                                            }}
+                                        >
+                                            {loadingMessage}
+                                        </Text>
+                                    )}
+                                </VStack>
                             )}
                         </VStack>
                     </VStack>
