@@ -19,7 +19,21 @@ const CreatePostPage = () => {
     const [previewImage, setPreviewImage] = useState("");
     const [imageFile, setImageFile] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [loadingMessage, setLoadingMessage] = useState("");
     const {createPost} = usePostGlobal();
+
+    const loadingMessages = [
+        "Uploading your terrible content...",
+        "Processing your awful creation...",
+        "Preparing for maximum dislikes...",
+        "Compressing your disaster...",
+        "Getting ready to disappoint everyone...",
+        "Making it even worse...",
+        "Adding extra cringe...",
+        "Optimizing for maximum hate...",
+        "Finalizing your masterpiece of failure...",
+        "Almost ready to ruin everyone's day..."
+    ];
 
     const handleAddPost = async() => {
         if (!newPost.title || !newPost.caption || !newPost.userId || !imageFile) {
@@ -34,6 +48,19 @@ const CreatePostPage = () => {
         }
 
         setIsLoading(true);
+        
+        // Start cycling through random loading messages
+        const getRandomMessage = () => {
+            const randomIndex = Math.floor(Math.random() * loadingMessages.length);
+            setLoadingMessage(loadingMessages[randomIndex]);
+        };
+        
+        // Set initial message
+        getRandomMessage();
+        
+        // Change message every 2 seconds
+        const messageInterval = setInterval(getRandomMessage, 2000);
+        
         try {
             // Upload image to backend for S3 upload
             const formData = new FormData();
@@ -92,7 +119,9 @@ const CreatePostPage = () => {
                 isClosable: true,
             });
         } finally {
+            clearInterval(messageInterval);
             setIsLoading(false);
+            setLoadingMessage("");
         }
     };
 
@@ -269,15 +298,36 @@ const CreatePostPage = () => {
                             />
                         </Box>
 
-                        <Button
-                            onClick={handleAddPost}
-                            colorScheme="blue"
-                            w="100%"
-                            isLoading={isLoading}
-                            loadingText="Creating post"
-                        >
-                            Create Post
-                        </Button>
+                        <VStack spacing={3} w="100%">
+                            <Button
+                                onClick={handleAddPost}
+                                colorScheme="blue"
+                                w="100%"
+                                isLoading={isLoading}
+                                loadingText="Creating post"
+                            >
+                                Create Post
+                            </Button>
+                            
+                            {isLoading && loadingMessage && (
+                                <Text 
+                                    color="blue.300" 
+                                    fontSize="sm" 
+                                    textAlign="center"
+                                    fontStyle="italic"
+                                    opacity={0.8}
+                                    animation="fadeIn 0.5s ease-in-out"
+                                    sx={{
+                                        '@keyframes fadeIn': {
+                                            '0%': { opacity: 0 },
+                                            '100%': { opacity: 0.8 }
+                                        }
+                                    }}
+                                >
+                                    {loadingMessage}
+                                </Text>
+                            )}
+                        </VStack>
                     </VStack>
                 </Box>
             </VStack>

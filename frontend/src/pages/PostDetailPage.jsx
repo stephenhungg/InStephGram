@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
     Box,
     Container,
@@ -15,13 +15,16 @@ import {
     Divider,
     Heading,
     useToast,
-    Spinner
+    Spinner,
+    IconButton
 } from '@chakra-ui/react';
 import { useUserGlobal } from '../global/user';
 import { API_BASE_URL } from '../config/api';
+import { FaTimes } from 'react-icons/fa';
 
 const PostDetailPage = () => {
     const { postId } = useParams();
+    const navigate = useNavigate();
     const { currentUser } = useUserGlobal();
     const [post, setPost] = useState(null);
     const [comments, setComments] = useState([]);
@@ -127,6 +130,41 @@ const PostDetailPage = () => {
 
     return (
         <Container maxW="container.xl" py={8}>
+            {/* Close Button */}
+            <Box position="relative" mb={4}>
+                <IconButton
+                    icon={<FaTimes />}
+                    aria-label="Close post"
+                    onClick={() => navigate('/')}
+                    position="absolute"
+                    top={0}
+                    right={0}
+                    size="lg"
+                    colorScheme="gray"
+                    variant="ghost"
+                    color="white"
+                    _hover={{
+                        bg: "whiteAlpha.200",
+                        transform: "scale(1.1)",
+                        transition: "all 0.2s"
+                    }}
+                    opacity={0}
+                    animation="fadeInDown 1s ease-out 0.3s forwards"
+                    sx={{
+                        '@keyframes fadeInDown': {
+                            '0%': {
+                                opacity: 0,
+                                transform: 'translateY(-10px)'
+                            },
+                            '100%': {
+                                opacity: 1,
+                                transform: 'translateY(0)'
+                            }
+                        }
+                    }}
+                />
+            </Box>
+            
             <Grid templateColumns={{ base: "1fr", md: "1fr 400px" }} gap={8}>
                 {/* Left side - Post Image */}
                 <GridItem>
