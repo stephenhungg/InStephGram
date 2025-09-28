@@ -43,7 +43,12 @@ const CreatePostPage = () => {
 
             if (uploadResponse.success) {
                 const imageUrl = uploadResponse.imageUrl;
-                const postWithImage = { ...newPost, image: imageUrl };
+                const mediaType = uploadResponse.mediaType || 'image';
+                const postWithImage = { 
+                    ...newPost, 
+                    image: imageUrl,
+                    mediaType: mediaType
+                };
                 
                 const postResponse = await apiRequest('/api/posts', {
                     method: 'POST',
@@ -94,10 +99,13 @@ const CreatePostPage = () => {
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            const isVideo = file.type.startsWith('video/');
+            const isImage = file.type.startsWith('image/');
+            
+            if (!isVideo && !isImage) {
                 toast({
-                    title: "File too large",
-                    description: "Please select an image under 5MB",
+                    title: "Invalid file type",
+                    description: "Please select an image or video file",
                     status: "error",
                     duration: 5000,
                     isClosable: true,
@@ -105,10 +113,11 @@ const CreatePostPage = () => {
                 return;
             }
             
-            if (!file.type.startsWith('image/')) {
+            const maxSize = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024; // 100MB for videos, 10MB for images
+            if (file.size > maxSize) {
                 toast({
-                    title: "Invalid file type",
-                    description: "Please select an image file",
+                    title: "File too large",
+                    description: `Please select ${isVideo ? 'a video under 100MB' : 'an image under 10MB'}`,
                     status: "error",
                     duration: 5000,
                     isClosable: true,
@@ -129,8 +138,45 @@ const CreatePostPage = () => {
     return (
         <Container maxW="container.md" py={8}>
             <VStack spacing={8}>
-                <Heading color="white">Create New Post</Heading>
-                <Box w="100%" bg="whiteAlpha.200" p={6} rounded="lg">
+                <Heading 
+                    color="white"
+                    opacity={0}
+                    animation="fadeInDown 1s ease-out forwards"
+                    sx={{
+                        '@keyframes fadeInDown': {
+                            '0%': {
+                                opacity: 0,
+                                transform: 'translateY(-20px)'
+                            },
+                            '100%': {
+                                opacity: 1,
+                                transform: 'translateY(0)'
+                            }
+                        }
+                    }}
+                >
+                    Create New Post
+                </Heading>
+                <Box 
+                    w="100%" 
+                    bg="whiteAlpha.200" 
+                    p={6} 
+                    rounded="lg"
+                    opacity={0}
+                    animation="fadeInUp 1s ease-out 0.2s forwards"
+                    sx={{
+                        '@keyframes fadeInUp': {
+                            '0%': {
+                                opacity: 0,
+                                transform: 'translateY(30px)'
+                            },
+                            '100%': {
+                                opacity: 1,
+                                transform: 'translateY(0)'
+                            }
+                        }
+                    }}
+                >
                     <VStack spacing={4}>
                         <Input
                             placeholder="Title"
@@ -165,13 +211,26 @@ const CreatePostPage = () => {
                         >
                             {previewImage ? (
                                 <Box position="relative" w="100%" h="100%">
-                                    <Image
-                                        src={previewImage}
-                                        alt="Preview"
-                                        objectFit="contain"
-                                        w="100%"
-                                        h="100%"
-                                    />
+                                    {imageFile && imageFile.type.startsWith('video/') ? (
+                                        <video
+                                            src={previewImage}
+                                            style={{
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'contain'
+                                            }}
+                                            controls
+                                            muted
+                                        />
+                                    ) : (
+                                        <Image
+                                            src={previewImage}
+                                            alt="Preview"
+                                            objectFit="contain"
+                                            w="100%"
+                                            h="100%"
+                                        />
+                                    )}
                                     <IconButton
                                         icon={<Icon as={LuX} />}
                                         position="absolute"
@@ -198,13 +257,13 @@ const CreatePostPage = () => {
                                     _hover={{ bg: 'whiteAlpha.100' }}
                                 >
                                     <Icon as={LuUpload} boxSize={8} color="gray.400" />
-                                    <Text color="gray.400">Click to upload image</Text>
+                                    <Text color="gray.400">Click to upload image or video</Text>
                                 </Button>
                             )}
                             <Input
                                 id="image-upload"
                                 type="file"
-                                accept="image/*"
+                                accept="image/*,video/*"
                                 onChange={handleImageChange}
                                 display="none"
                             />

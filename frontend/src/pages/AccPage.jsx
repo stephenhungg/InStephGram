@@ -24,19 +24,16 @@ const AccPage = () => {
 
         const fetchUserPosts = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/posts`);
+                // Use the user-specific endpoint instead of fetching all posts
+                const response = await fetch(`${API_BASE_URL}/api/posts/user/${currentUser._id}`);
                 const data = await response.json();
                 if (data.success) {
-                    // Filter posts by current user and sort by date
-                    const filteredPosts = data.data
-                        .filter(post => post.userId === currentUser._id)
-                        .map(post => ({
-                            ...post,
-                            likes: post.likes || [],
-                            likesCount: post.likesCount || 0
-                        }))
-                        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                    setUserPosts(filteredPosts);
+                    const processedPosts = data.data.map(post => ({
+                        ...post,
+                        likes: post.likes || [],
+                        likesCount: post.likesCount || 0
+                    }));
+                    setUserPosts(processedPosts);
                 }
             } catch (error) {
                 console.error('Error fetching user posts:', error);
@@ -186,6 +183,20 @@ const AccPage = () => {
                     textAlign="center" 
                     bgClip="text"
                     color="white"
+                    opacity={0}
+                    animation="fadeInDown 1s ease-out forwards"
+                    sx={{
+                        '@keyframes fadeInDown': {
+                            '0%': {
+                                opacity: 0,
+                                transform: 'translateY(-20px)'
+                            },
+                            '100%': {
+                                opacity: 1,
+                                transform: 'translateY(0)'
+                            }
+                        }
+                    }}
                 >
                     Account Information
                 </Heading>
@@ -198,6 +209,20 @@ const AccPage = () => {
                     shadow="md" 
                     bg="whiteAlpha.200"
                     backdropFilter="blur(10px)"
+                    opacity={0}
+                    animation="fadeInUp 1s ease-out 0.2s forwards"
+                    sx={{
+                        '@keyframes fadeInUp': {
+                            '0%': {
+                                opacity: 0,
+                                transform: 'translateY(30px)'
+                            },
+                            '100%': {
+                                opacity: 1,
+                                transform: 'translateY(0)'
+                            }
+                        }
+                    }}
                 >
                     <VStack spacing={4} align="stretch">
                         <Box>
@@ -237,6 +262,20 @@ const AccPage = () => {
                     size="xl" 
                     textAlign="center" 
                     color="white"
+                    opacity={0}
+                    animation="fadeInDown 1s ease-out 0.4s forwards"
+                    sx={{
+                        '@keyframes fadeInDown': {
+                            '0%': {
+                                opacity: 0,
+                                transform: 'translateY(-20px)'
+                            },
+                            '100%': {
+                                opacity: 1,
+                                transform: 'translateY(0)'
+                            }
+                        }
+                    }}
                 >
                     Your Posts
                 </Heading>
@@ -286,7 +325,7 @@ const AccPage = () => {
                                     </HStack>
                                 </Box>
 
-                                {/* Post Image */}
+                                {/* Post Media (Image or Video) */}
                                 <Box 
                                     position="relative" 
                                     width="100%" 
@@ -307,14 +346,29 @@ const AccPage = () => {
                                         alignItems="center"
                                         justifyContent="center"
                                     >
-                                        <Image
-                                            src={post.image}
-                                            alt={post.title}
-                                            width="100%"
-                                            height="100%"
-                                            objectFit="contain"
-                                            backgroundColor="transparent"
-                                        />
+                                        {post.mediaType === 'video' ? (
+                                            <video
+                                                src={post.image}
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    objectFit: 'contain',
+                                                    backgroundColor: 'transparent'
+                                                }}
+                                                controls
+                                                muted
+                                                preload="metadata"
+                                            />
+                                        ) : (
+                                            <Image
+                                                src={post.image}
+                                                alt={post.title}
+                                                width="100%"
+                                                height="100%"
+                                                objectFit="contain"
+                                                backgroundColor="transparent"
+                                            />
+                                        )}
                                     </Link>
                                 </Box>
 

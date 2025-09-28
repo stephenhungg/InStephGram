@@ -63,10 +63,55 @@ const LoginPage = () => {
     return (
         <Container maxW={"container.sm"}>
             <VStack spacing={8}>
-                <Heading as={"h1"} size={"2xl"} textAlign={"center"} mb={8} bgClip="text" color="white">
+                <Heading 
+                    as={"h1"} 
+                    size={"2xl"} 
+                    textAlign={"center"} 
+                    mb={8} 
+                    bgClip="text" 
+                    color="white"
+                    opacity={0}
+                    animation="fadeInDown 1s ease-out forwards"
+                    sx={{
+                        '@keyframes fadeInDown': {
+                            '0%': {
+                                opacity: 0,
+                                transform: 'translateY(-20px)'
+                            },
+                            '100%': {
+                                opacity: 1,
+                                transform: 'translateY(0)'
+                            }
+                        }
+                    }}
+                >
                     Login
                 </Heading>
-                <Box w={"full"} p={6} rounded={"lg"} shadow={"md"} bg="whiteAlpha.200" backdropFilter="blur(10px)">
+                <Box 
+                    w={"full"} 
+                    p={8} 
+                    rounded={"lg"} 
+                    shadow={"2xl"} 
+                    bg="rgba(255, 255, 255, 0.05)"
+                    backdropFilter="blur(20px)"
+                    border="1px solid"
+                    borderColor="rgba(255, 255, 255, 0.1)"
+                    boxShadow="0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)"
+                    opacity={0}
+                    animation="fadeInUp 1s ease-out 0.2s forwards"
+                    sx={{
+                        '@keyframes fadeInUp': {
+                            '0%': {
+                                opacity: 0,
+                                transform: 'translateY(30px)'
+                            },
+                            '100%': {
+                                opacity: 1,
+                                transform: 'translateY(0)'
+                            }
+                        }
+                    }}
+                >
                     <VStack spacing={4}>
                         <Input 
                             placeholder='Username' 
@@ -75,14 +120,8 @@ const LoginPage = () => {
                             onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
                             size="lg"
                             variant="filled"
-                            bg="whiteAlpha.300"
                             color="white"
                             _placeholder={{ color: "gray.400" }}
-                            _hover={{ bg: "whiteAlpha.400" }}
-                            _focus={{ 
-                                bg: "whiteAlpha.500",
-                                borderColor: "whiteAlpha.500"
-                            }}
                         />
                         <Input 
                             placeholder='Password' 
@@ -91,14 +130,8 @@ const LoginPage = () => {
                             onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
                             size="lg"
                             variant="filled"
-                            bg="whiteAlpha.300"
                             color="white"
                             _placeholder={{ color: "gray.400" }}
-                            _hover={{ bg: "whiteAlpha.400" }}
-                            _focus={{ 
-                                bg: "whiteAlpha.500",
-                                borderColor: "whiteAlpha.500"
-                            }}
                         />
                         <Button 
                             onClick={handleLogin} 
@@ -108,8 +141,7 @@ const LoginPage = () => {
                             loadingText="Logging in..."
                             _hover={{ transform: 'scale(1.02)' }}
                             transition="all 0.2s"
-                            bg="whiteAlpha.500"
-                            colorScheme="whiteAlpha"
+                            colorScheme="blue"
                         >
                             Login
                         </Button>

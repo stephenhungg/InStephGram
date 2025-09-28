@@ -4,36 +4,67 @@ import { Link as RouterLink } from 'react-router-dom';
 import { FaRegThumbsDown, FaThumbsDown } from 'react-icons/fa';
 import { useUserGlobal } from '../global/user';
 import { apiRequest } from '../utils/api';
+import Beams from '../components/Beams';
+import TextType from '../components/TextType';
 
 const HomePage = () => {
     const [posts, setPosts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [likingInProgress, setLikingInProgress] = useState({});
+    const [pagination, setPagination] = useState({
+        currentPage: 1,
+        hasNextPage: false,
+        totalPosts: 0
+    });
     const { currentUser } = useUserGlobal();
 
     useEffect(() => {
-        const fetchPosts = async () => {
-            try {
-                const data = await apiRequest('/api/posts');
-                if (data.success) {
-                    setPosts(data.data
-                        .map(post => ({
-                            ...post,
-                            likes: post.likes || [],
-                            likesCount: post.likesCount || 0
-                        }))
-                        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                    );
-                }
-            } catch (error) {
-                console.error('Error fetching posts:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         fetchPosts();
     }, []);
+
+    const fetchPosts = async (page = 1, append = false) => {
+        try {
+            if (!append) setIsLoading(true);
+            else setIsLoadingMore(true);
+
+            const data = await apiRequest(`/api/posts?page=${page}&limit=10`);
+            
+            if (data.success) {
+                const processedPosts = data.data.map(post => ({
+                    ...post,
+                    likes: post.likes || [],
+                    likesCount: post.likesCount || 0
+                }));
+
+                if (append) {
+                    // Append new posts to existing ones
+                    setPosts(prevPosts => [...prevPosts, ...processedPosts]);
+                } else {
+                    // Replace posts (initial load)
+                    setPosts(processedPosts);
+                }
+
+                // Update pagination info
+                setPagination({
+                    currentPage: data.pagination.currentPage,
+                    hasNextPage: data.pagination.hasNextPage,
+                    totalPosts: data.pagination.totalPosts
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching posts:', error);
+        } finally {
+            setIsLoading(false);
+            setIsLoadingMore(false);
+        }
+    };
+
+    const loadMorePosts = () => {
+        if (pagination.hasNextPage && !isLoadingMore) {
+            fetchPosts(pagination.currentPage + 1, true);
+        }
+    };
 
     const handleLike = async (postId) => {
         if (likingInProgress[postId]) return;
@@ -71,8 +102,54 @@ const HomePage = () => {
     };
 
     return (
-        <Container maxW="container.md" py={12}>
-            <VStack spacing={12}>
+        <Box position="relative" minH="100vh">
+            {/* Animated Beams Background */}
+            <Box 
+                position="fixed"
+                top={0}
+                left={0}
+                right={0}
+                bottom={0}
+                zIndex={-1}
+                pointerEvents="none"
+            >
+                <Beams 
+                    beamWidth={2}
+                    beamHeight={15}
+                    beamNumber={16}
+                    lightColor="#cccccc"
+                    speed={1.5}
+                    noiseIntensity={1.2}
+                    scale={0.15}
+                    rotation={30}
+                />
+                {/* Black vignette overlay to fade beams at edges */}
+                <Box
+                    position="absolute"
+                    top={0}
+                    left={0}
+                    right={0}
+                    bottom={0}
+                    background={`
+                        linear-gradient(
+                            to right,
+                            black 0%,
+                            black 10%,
+                            rgba(0, 0, 0, 0.8) 20%,
+                            rgba(0, 0, 0, 0.3) 35%,
+                            transparent 50%,
+                            rgba(0, 0, 0, 0.3) 65%,
+                            rgba(0, 0, 0, 0.8) 80%,
+                            black 90%,
+                            black 100%
+                        )
+                    `}
+                    pointerEvents="none"
+                />
+            </Box>
+            
+            <Container maxW="container.md" py={12}>
+                <VStack spacing={12}>
                 {isLoading ? (
                     <Text fontSize="xl" color="gray.500">Loading posts...</Text>
                 ) : posts.length === 0 ? (
@@ -80,23 +157,72 @@ const HomePage = () => {
                         <Text
                             fontSize={{base:"4xl", sm:"6xl"}}
                             fontWeight={"bold"}
+                            bgGradient="linear(to-r, white, blue.300, white)"
                             bgClip={"text"} 
                             textAlign={"center"}
                             color="white"
                             mb={2}
+                            textShadow="0 0 20px rgba(59, 130, 246, 0.5)"
+                            minH="1.2em"
                         >   
-                            Welcome to InStephGram
+                            <TextType
+                                text="Welcome to InStephGram"
+                                typingSpeed={100}
+                                showCursor={true}
+                                cursorCharacter="|"
+                                loop={false}
+                                initialDelay={500}
+                            />
                         </Text>
                         <Text
                             fontSize={{base:"lg", sm:"xl"}}
                             textAlign={"center"}
-                            color="gray.400"
+                            color="gray.300"
                             mb={8}
                             px={4}
+                            bg="rgba(0, 0, 0, 0.3)"
+                            backdropFilter="blur(10px)"
+                            rounded="lg"
+                            py={4}
+                            border="1px solid"
+                            borderColor="rgba(255, 255, 255, 0.1)"
+                            opacity={0}
+                            animation="fadeInUp 1.2s ease-out 0.3s forwards"
+                            sx={{
+                                '@keyframes fadeInUp': {
+                                    '0%': {
+                                        opacity: 0,
+                                        transform: 'translateY(30px)'
+                                    },
+                                    '100%': {
+                                        opacity: 1,
+                                        transform: 'translateY(0)'
+                                    }
+                                }
+                            }}
                         >
                             Your mission: Post the worst content possible and collect those dislikes!
                         </Text>
-                        <Text fontSize='xl' textAlign={"center"} fontWeight='bold' color='gray.500'>
+                        <Text 
+                            fontSize='xl' 
+                            textAlign={"center"} 
+                            fontWeight='bold' 
+                            color='gray.500'
+                            opacity={0}
+                            animation="fadeInUp 1.2s ease-out 0.6s forwards"
+                            sx={{
+                                '@keyframes fadeInUp': {
+                                    '0%': {
+                                        opacity: 0,
+                                        transform: 'translateY(30px)'
+                                    },
+                                    '100%': {
+                                        opacity: 1,
+                                        transform: 'translateY(0)'
+                                    }
+                                }
+                            }}
+                        >
                             No posts yet, create one!{" "}
                             <RouterLink to={"/post"}>
                                 <Text as='span' color='blue.500' fontWeight='bold' _hover={{ textDecoration: "underline"}}> 
@@ -112,11 +238,14 @@ const HomePage = () => {
                                 key={post._id}
                                 maxW="500px"
                                 w="full"
-                                bg="whiteAlpha.200"
-                                backdropFilter="blur(10px)"
+                                bg="rgba(255, 255, 255, 0.05)"
+                                backdropFilter="blur(20px)"
+                                border="1px solid"
+                                borderColor="rgba(255, 255, 255, 0.1)"
                                 rounded="lg"
                                 overflow="hidden"
-                                shadow="md"
+                                shadow="2xl"
+                                boxShadow="0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)"
                                 mx="auto"
                             >
                                 {/* Author Header */}
@@ -143,7 +272,7 @@ const HomePage = () => {
                                     </HStack>
                                 </Box>
 
-                                {/* Post Image */}
+                                {/* Post Media (Image or Video) */}
                                 <Box 
                                     position="relative" 
                                     width="100%" 
@@ -164,14 +293,29 @@ const HomePage = () => {
                                         alignItems="center"
                                         justifyContent="center"
                                     >
-                                        <Image
-                                            src={post.image}
-                                            alt={post.title}
-                                            width="100%"
-                                            height="100%"
-                                            objectFit="contain"
-                                            backgroundColor="transparent"
-                                        />
+                                        {post.mediaType === 'video' ? (
+                                            <video
+                                                src={post.image}
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    objectFit: 'contain',
+                                                    backgroundColor: 'transparent'
+                                                }}
+                                                controls
+                                                muted
+                                                preload="metadata"
+                                            />
+                                        ) : (
+                                            <Image
+                                                src={post.image}
+                                                alt={post.title}
+                                                width="100%"
+                                                height="100%"
+                                                objectFit="contain"
+                                                backgroundColor="transparent"
+                                            />
+                                        )}
                                     </Link>
                                 </Box>
 
@@ -223,10 +367,37 @@ const HomePage = () => {
                                 </Box>
                             </Box>
                         ))}
+                        
+                        {/* Load More Button */}
+                        {pagination.hasNextPage && (
+                            <Button
+                                onClick={loadMorePosts}
+                                isLoading={isLoadingMore}
+                                loadingText="Loading more posts..."
+                                size="lg"
+                                colorScheme="blue"
+                                variant="outline"
+                                mt={8}
+                                _hover={{
+                                    transform: 'scale(1.05)',
+                                    transition: 'transform 0.2s'
+                                }}
+                            >
+                                Load More Posts
+                            </Button>
+                        )}
+                        
+                        {/* Show total posts info */}
+                        {posts.length > 0 && (
+                            <Text color="gray.500" fontSize="sm" mt={4}>
+                                Showing {posts.length} of {pagination.totalPosts} posts
+                            </Text>
+                        )}
                     </VStack>
                 )}
-            </VStack>
-        </Container>
+                </VStack>
+            </Container>
+        </Box>
     );
 };
 

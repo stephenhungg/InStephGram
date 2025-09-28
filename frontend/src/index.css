@@ -1,0 +1,85 @@
+/* Import Geist Mono font */
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+/* Apply Geist Mono globally with lighter weights */
+* {
+  font-family: 'Geist Mono', 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Courier New', monospace;
+  font-weight: 300; /* Light weight by default */
+}
+
+/* Ensure all text elements use Geist Mono with light weight */
+body, html, input, textarea, button, select {
+  font-family: 'Geist Mono', 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Courier New', monospace;
+  font-weight: 300; /* Light weight */
+}
+
+/* Override any default font weights */
+.chakra-ui-light, .chakra-ui-dark {
+  font-family: 'Geist Mono', 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Courier New', monospace;
+  font-weight: 300; /* Light weight */
+}
+
+/* Specific weight overrides for different elements */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 400 !important; /* Medium weight for headings */
+}
+
+/* Bold text should use medium weight instead of bold */
+b, strong, .chakra-text[data-weight="bold"] {
+  font-weight: 500 !important; /* Medium-bold instead of heavy bold */
+}
+
+/* Button text should be slightly heavier but still thin */
+button {
+  font-weight: 400 !important;
+}
+
+/* Input placeholder text should be extra light */
+input::placeholder, textarea::placeholder {
+  font-weight: 200 !important;
+}
+
+/* Glassmorphism utilities */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.glass-button {
+  background: rgba(59, 130, 246, 0.2) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  box-shadow: 
+    0 4px 16px rgba(59, 130, 246, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}

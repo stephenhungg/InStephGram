@@ -34,8 +34,22 @@ const CreateAccPage = () => {
                     size={"2xl"} 
                     textAlign={"center"} 
                     mb={8} 
-                    bgClip="text"
+                    bgClip="text" 
                     color="white"
+                    opacity={0}
+                    animation="fadeInDown 1s ease-out forwards"
+                    sx={{
+                        '@keyframes fadeInDown': {
+                            '0%': {
+                                opacity: 0,
+                                transform: 'translateY(-20px)'
+                            },
+                            '100%': {
+                                opacity: 1,
+                                transform: 'translateY(0)'
+                            }
+                        }
+                    }}
                 >
                     Create Account
                 </Heading>
@@ -43,8 +57,26 @@ const CreateAccPage = () => {
                     w={"full"} 
                     p={8} 
                     rounded={"lg"} 
-                    shadow={"lg"} 
-                    backdropFilter="blur(10px)"
+                    shadow={"2xl"} 
+                    bg="rgba(255, 255, 255, 0.05)"
+                    backdropFilter="blur(20px)"
+                    border="1px solid"
+                    borderColor="rgba(255, 255, 255, 0.1)"
+                    boxShadow="0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)"
+                    opacity={0}
+                    animation="fadeInUp 1s ease-out 0.2s forwards"
+                    sx={{
+                        '@keyframes fadeInUp': {
+                            '0%': {
+                                opacity: 0,
+                                transform: 'translateY(30px)'
+                            },
+                            '100%': {
+                                opacity: 1,
+                                transform: 'translateY(0)'
+                            }
+                        }
+                    }}
                 >
                     <VStack spacing={4}>
                         <Input 
@@ -54,14 +86,8 @@ const CreateAccPage = () => {
                             onChange={(e) => setNewAcc({ ...newAcc, username: e.target.value })}
                             size="lg"
                             variant="filled"
-                            bg="whiteAlpha.300"
                             color="white"
                             _placeholder={{ color: "gray.400" }}
-                            _hover={{ bg: "whiteAlpha.400" }}
-                            _focus={{ 
-                                bg: "whiteAlpha.500",
-                                borderColor: "whiteAlpha.500"
-                            }}
                         />
                         <Input 
                             placeholder='Email' 
@@ -70,14 +96,8 @@ const CreateAccPage = () => {
                             onChange={(e) => setNewAcc({ ...newAcc, email: e.target.value })}
                             size="lg"
                             variant="filled"
-                            bg="whiteAlpha.300"
                             color="white"
                             _placeholder={{ color: "gray.400" }}
-                            _hover={{ bg: "whiteAlpha.400" }}
-                            _focus={{ 
-                                bg: "whiteAlpha.500",
-                                borderColor: "whiteAlpha.500"
-                            }}
                         />
                         <Input 
                             placeholder='Password' 
@@ -86,24 +106,17 @@ const CreateAccPage = () => {
                             onChange={(e) => setNewAcc({ ...newAcc, password: e.target.value })}
                             size="lg"
                             variant="filled"
-                            bg="whiteAlpha.300"
                             color="white"
                             _placeholder={{ color: "gray.400" }}
-                            _hover={{ bg: "whiteAlpha.400" }}
-                            _focus={{ 
-                                bg: "whiteAlpha.500",
-                                borderColor: "blue.500"
-                            }}
                         />
                         <Button 
                             onClick={handleAddUser}
                             w='full'
                             size="lg"
-                            colorScheme="whiteAlpha"
+                            colorScheme="blue"
                             mt={4}
                             _hover={{ 
-                                transform: 'scale(1.02)',
-                                bg: "whiteAlpha.500"
+                                transform: 'scale(1.02)'
                             }}
                             transition="all 0.2s"
                         >

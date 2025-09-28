@@ -140,13 +140,27 @@ const PostDetailPage = () => {
                         alignItems="center"
                         justifyContent="center"
                     >
-                        <Image
-                            src={post.image}
-                            alt={post.title}
-                            objectFit="contain"
-                            w="100%"
-                            h="100%"
-                        />
+                        {post.mediaType === 'video' ? (
+                            <video
+                                src={post.image}
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'contain'
+                                }}
+                                controls
+                                muted
+                                preload="metadata"
+                            />
+                        ) : (
+                            <Image
+                                src={post.image}
+                                alt={post.title}
+                                objectFit="contain"
+                                w="100%"
+                                h="100%"
+                            />
+                        )}
                     </Box>
                 </GridItem>
 
@@ -162,7 +176,25 @@ const PostDetailPage = () => {
                     >
                         {/* Post Details */}
                         <Box>
-                            <Heading size="lg" color="white" mb={2}>
+                            <Heading 
+                                size="lg" 
+                                color="white" 
+                                mb={2}
+                                opacity={0}
+                                animation="fadeInDown 1s ease-out forwards"
+                                sx={{
+                                    '@keyframes fadeInDown': {
+                                        '0%': {
+                                            opacity: 0,
+                                            transform: 'translateY(-20px)'
+                                        },
+                                        '100%': {
+                                            opacity: 1,
+                                            transform: 'translateY(0)'
+                                        }
+                                    }
+                                }}
+                            >
                                 {post.title}
                             </Heading>
                             <Text color="gray.300" fontSize="md">
@@ -177,7 +209,24 @@ const PostDetailPage = () => {
 
                         {/* Comments Section */}
                         <VStack spacing={4} align="stretch" flex="1" overflowY="auto" maxH="500px">
-                            <Heading size="md" color="white">
+                            <Heading 
+                                size="md" 
+                                color="white"
+                                opacity={0}
+                                animation="fadeInUp 1s ease-out 0.2s forwards"
+                                sx={{
+                                    '@keyframes fadeInUp': {
+                                        '0%': {
+                                            opacity: 0,
+                                            transform: 'translateY(30px)'
+                                        },
+                                        '100%': {
+                                            opacity: 1,
+                                            transform: 'translateY(0)'
+                                        }
+                                    }
+                                }}
+                            >
                                 Comments
                             </Heading>
                             

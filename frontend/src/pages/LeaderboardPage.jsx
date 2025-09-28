@@ -7,37 +7,32 @@ import { API_BASE_URL } from '../config/api';
 const LeaderboardPage = () => {
     const { currentUser } = useUserGlobal();
     const navigate = useNavigate();
-    const [leaderboardData, setLeaderboardData] = useState(null);
+    const [leaderboardData, setLeaderboardData] = useState([]);
+    const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        if (!currentUser) {
-            navigate('/login');
-            return;
-        }
-
         const fetchLeaderboard = async () => {
             try {
+                setError(null);
                 const response = await fetch(`${API_BASE_URL}/api/users/leaderboard`);
                 const data = await response.json();
                 if (data.success) {
-                    setLeaderboardData(data.data);
+                    setLeaderboardData(data.data || []);
                 } else {
                     console.error('Failed to fetch leaderboard:', data);
+                    setError('Failed to fetch leaderboard data');
                 }
             } catch (error) {
                 console.error('Error fetching leaderboard:', error);
+                setError('Error connecting to server');
             } finally {
                 setIsLoading(false);
             }
         };
         fetchLeaderboard();
-    }, [currentUser, navigate]);
+    }, []);
 
-    if (!currentUser) {
-
-        return null;
-    }
 
     return (
         <Container maxW="container.lg" py={8}>
@@ -48,6 +43,20 @@ const LeaderboardPage = () => {
                     textAlign="center" 
                     bgClip="text"
                     color="white"
+                    opacity={0}
+                    animation="fadeInDown 1s ease-out forwards"
+                    sx={{
+                        '@keyframes fadeInDown': {
+                            '0%': {
+                                opacity: 0,
+                                transform: 'translateY(-20px)'
+                            },
+                            '100%': {
+                                opacity: 1,
+                                transform: 'translateY(0)'
+                            }
+                        }
+                    }}
                 >
                     Leaderboard
                 </Heading>
@@ -87,7 +96,7 @@ const LeaderboardPage = () => {
                                     w="full" 
                                     px={4} 
                                     py={3}
-                                    bg={player.username === currentUser.username ? "whiteAlpha.300" : "whiteAlpha.50"}
+                                    bg={currentUser && player.username === currentUser.username ? "whiteAlpha.300" : "whiteAlpha.50"}
                                     rounded="md"
                                     justifyContent="space-between"
                                     transition="all 0.2s"
@@ -111,7 +120,7 @@ const LeaderboardPage = () => {
                                         >
                                             <Text color="white" fontSize="lg">
                                                 {player.username}
-                                                {player.username === currentUser.username && 
+                                                {currentUser && player.username === currentUser.username && 
                                                     <Badge ml={2} colorScheme="green">You</Badge>
                                                 }
                                             </Text>
@@ -123,7 +132,13 @@ const LeaderboardPage = () => {
                                 </HStack>
                             ))}
 
-                            {leaderboardData.length === 0 && (
+                            {error && (
+                                <Text color="red.400" textAlign="center" py={4}>
+                                    {error}
+                                </Text>
+                            )}
+                            
+                            {!error && leaderboardData.length === 0 && (
                                 <Text color="gray.400" textAlign="center" py={4}>
                                     No leaderboard data available
                                 </Text>

@@ -13,6 +13,9 @@ dist/
 build/
 frontend/dist/
 
+# Temporary files
+backend/temp/
+
 # Logs
 logs
 *.log

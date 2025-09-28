@@ -128,6 +128,20 @@ const UserProfilePage = () => {
                                 size="2xl" 
                                 textAlign="center" 
                                 color="white"
+                                opacity={0}
+                                animation="fadeInDown 1s ease-out forwards"
+                                sx={{
+                                    '@keyframes fadeInDown': {
+                                        '0%': {
+                                            opacity: 0,
+                                            transform: 'translateY(-20px)'
+                                        },
+                                        '100%': {
+                                            opacity: 1,
+                                            transform: 'translateY(0)'
+                                        }
+                                    }
+                                }}
                             >
                                 {profileUser.username}'s Profile
                             </Heading>
@@ -135,6 +149,20 @@ const UserProfilePage = () => {
                                 fontSize="lg" 
                                 color="gray.400" 
                                 textAlign="center"
+                                opacity={0}
+                                animation="fadeInUp 1s ease-out 0.2s forwards"
+                                sx={{
+                                    '@keyframes fadeInUp': {
+                                        '0%': {
+                                            opacity: 0,
+                                            transform: 'translateY(30px)'
+                                        },
+                                        '100%': {
+                                            opacity: 1,
+                                            transform: 'translateY(0)'
+                                        }
+                                    }
+                                }}
                             >
                                 Total Posts: {posts.length}
                             </Text>
@@ -176,7 +204,7 @@ const UserProfilePage = () => {
                                             </HStack>
                                         </Box>
 
-                                        {/* Post Image */}
+                                        {/* Post Media (Image or Video) */}
                                         <Box 
                                             position="relative" 
                                             width="100%" 
@@ -197,14 +225,29 @@ const UserProfilePage = () => {
                                                 alignItems="center"
                                                 justifyContent="center"
                                             >
-                                                <Image
-                                                    src={post.image}
-                                                    alt={post.title}
-                                                    width="100%"
-                                                    height="100%"
-                                                    objectFit="contain"
-                                                    backgroundColor="transparent"
-                                                />
+                                                {post.mediaType === 'video' ? (
+                                                    <video
+                                                        src={post.image}
+                                                        style={{
+                                                            width: '100%',
+                                                            height: '100%',
+                                                            objectFit: 'contain',
+                                                            backgroundColor: 'transparent'
+                                                        }}
+                                                        controls
+                                                        muted
+                                                        preload="metadata"
+                                                    />
+                                                ) : (
+                                                    <Image
+                                                        src={post.image}
+                                                        alt={post.title}
+                                                        width="100%"
+                                                        height="100%"
+                                                        objectFit="contain"
+                                                        backgroundColor="transparent"
+                                                    />
+                                                )}
                                             </Link>
                                         </Box>
 

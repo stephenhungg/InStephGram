@@ -2,6 +2,18 @@ import Post from "../models/Post.js";
 import User from "../models/User.js";
 import mongoose from "mongoose";
 import AWS from 'aws-sdk';
+import ffmpeg from 'fluent-ffmpeg';
+import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Set ffmpeg path
+ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+
+// Get current directory for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Configure AWS SDK
 AWS.config.update({
@@ -21,21 +33,25 @@ export const uploadToS3 = async (req, res) => {
             return res.status(400).json({ success: false, message: "No file uploaded" });
         }
 
-        // Validate file size (5MB limit)
-        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+        // Validate file size (100MB limit for videos, 10MB for images)
+        const isVideo = req.file.mimetype.startsWith('video/');
+        const MAX_FILE_SIZE = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024; // 100MB for videos, 10MB for images
         if (req.file.size > MAX_FILE_SIZE) {
             return res.status(400).json({ 
                 success: false, 
-                message: "File size exceeds 5MB limit" 
+                message: `File size exceeds ${isVideo ? '100MB' : '10MB'} limit` 
             });
         }
 
         // Validate file type
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        const allowedVideoTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm'];
+        const allowedTypes = [...allowedImageTypes, ...allowedVideoTypes];
+        
         if (!allowedTypes.includes(req.file.mimetype)) {
             return res.status(400).json({ 
                 success: false, 
-                message: "Invalid file type. Only JPEG, PNG, and GIF are allowed" 
+                message: "Invalid file type. Only JPEG, PNG, GIF, MP4, MOV, AVI, and WebM are allowed" 
             });
         }
 
@@ -54,29 +70,41 @@ export const uploadToS3 = async (req, res) => {
             });
         }
 
-        const sanitizedFileName = req.file.originalname.replace(/[^a-zA-Z0-9.]/g, '_');
-        const key = `${Date.now()}_${sanitizedFileName}`;
+        let uploadResult;
+        
+        if (isVideo) {
+            console.log('Processing video file...');
+            const videoUrl = await compressAndUploadVideo(req.file);
+            uploadResult = { Location: videoUrl, Key: `videos/${Date.now()}_compressed.mp4` };
+        } else {
+            console.log('Processing image file...');
+            const sanitizedFileName = req.file.originalname.replace(/[^a-zA-Z0-9.]/g, '_');
+            const key = `images/${Date.now()}_${sanitizedFileName}`;
 
-        const params = {
-            Bucket: process.env.S3_BUCKET_NAME,
-            Key: key,
-            Body: req.file.buffer,
-            ContentType: req.file.mimetype
-        };
+            const params = {
+                Bucket: process.env.S3_BUCKET_NAME,
+                Key: key,
+                Body: req.file.buffer,
+                ContentType: req.file.mimetype
+            };
 
-        console.log('Attempting S3 upload with params:', {
-            Bucket: params.Bucket,
-            Key: params.Key,
-            ContentType: params.ContentType
-        });
+            console.log('Attempting S3 upload with params:', {
+                Bucket: params.Bucket,
+                Key: params.Key,
+                ContentType: params.ContentType
+            });
 
-        const uploadResult = await s3.upload(params).promise();
-        console.log('S3 upload successful:', uploadResult);
+            uploadResult = await s3.upload(params).promise();
+        }
+        
+        console.log('Upload successful:', uploadResult);
         
         res.status(200).json({ 
             success: true, 
-            imageUrl: uploadResult.Location,
-            key: uploadResult.Key
+            imageUrl: uploadResult.Location, // Keep same property name for compatibility
+            mediaUrl: uploadResult.Location, // New property name for clarity
+            key: uploadResult.Key,
+            mediaType: isVideo ? 'video' : 'image'
         });
     } catch (error) {
         console.error('Error in uploadToS3:', error);
@@ -131,15 +159,144 @@ const uploadImageToS3 = async (file) => {
     });
 };
 
+// Function to compress and upload video to S3
+const compressAndUploadVideo = async (file) => {
+    return new Promise((resolve, reject) => {
+        // Create temporary file paths
+        const tempDir = path.join(__dirname, '../temp');
+        if (!fs.existsSync(tempDir)) {
+            fs.mkdirSync(tempDir, { recursive: true });
+        }
+        
+        const inputPath = path.join(tempDir, `input_${Date.now()}_${file.originalname}`);
+        const outputPath = path.join(tempDir, `output_${Date.now()}.mp4`);
+
+        try {
+            // Write buffer to temporary file
+            fs.writeFileSync(inputPath, file.buffer);
+            console.log('Video compression started...');
+
+            ffmpeg(inputPath)
+                .videoCodec('libx264')
+                .audioCodec('aac')
+                .format('mp4')
+                .videoBitrate('1000k') // 1 Mbps video bitrate
+                .audioBitrate('128k')  // 128 kbps audio bitrate
+                .size('1280x720')      // 720p resolution
+                .fps(30)               // 30 fps
+                .outputOptions([
+                    '-movflags faststart', // Optimize for streaming
+                    '-preset medium',      // Balance between compression speed and quality
+                    '-crf 23'             // Quality setting (18-28, lower = better quality)
+                ])
+                .on('start', (commandLine) => {
+                    console.log('FFmpeg command: ' + commandLine);
+                })
+                .on('progress', (progress) => {
+                    console.log('Processing: ' + progress.percent + '% done');
+                })
+                .on('end', async () => {
+                    try {
+                        console.log('Video compression completed');
+                        
+                        // Read compressed video
+                        const compressedBuffer = fs.readFileSync(outputPath);
+                        console.log(`Original size: ${file.size} bytes, Compressed size: ${compressedBuffer.length} bytes`);
+                        
+                        // Upload to S3
+                        const params = {
+                            Bucket: process.env.S3_BUCKET_NAME,
+                            Key: `videos/${Date.now()}_compressed.mp4`,
+                            Body: compressedBuffer,
+                            ContentType: 'video/mp4'
+                        };
+
+                        const uploadResult = await s3.upload(params).promise();
+                        
+                        // Clean up temporary files
+                        fs.unlinkSync(inputPath);
+                        fs.unlinkSync(outputPath);
+                        
+                        resolve(uploadResult.Location);
+                    } catch (uploadError) {
+                        console.error('Error uploading compressed video:', uploadError);
+                        // Clean up files on error
+                        try {
+                            fs.unlinkSync(inputPath);
+                            fs.unlinkSync(outputPath);
+                        } catch (cleanupError) {
+                            console.error('Error cleaning up files:', cleanupError);
+                        }
+                        reject(uploadError);
+                    }
+                })
+                .on('error', (err) => {
+                    console.error('FFmpeg error:', err);
+                    // Clean up files on error
+                    try {
+                        fs.unlinkSync(inputPath);
+                        if (fs.existsSync(outputPath)) {
+                            fs.unlinkSync(outputPath);
+                        }
+                    } catch (cleanupError) {
+                        console.error('Error cleaning up files:', cleanupError);
+                    }
+                    reject(err);
+                })
+                .save(outputPath);
+                
+        } catch (error) {
+            console.error('Error in video compression setup:', error);
+            // Clean up files on error
+            try {
+                if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
+                if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+            } catch (cleanupError) {
+                console.error('Error cleaning up files:', cleanupError);
+            }
+            reject(error);
+        }
+    });
+};
+
 export const getPost = async (req, res) => {
     try {
-        const posts = await Post.find({});
-        res.status(200).json({ success: true, data: posts });
+        // Get pagination parameters from query
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10; // Default to 10 posts per page
+        const skip = (page - 1) * limit;
+
+        // Get total count for pagination info
+        const totalPosts = await Post.countDocuments({});
+        
+        // Get posts with pagination, sorted by creation date (newest first)
+        const posts = await Post.find({})
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        // Calculate pagination info
+        const totalPages = Math.ceil(totalPosts / limit);
+        const hasNextPage = page < totalPages;
+        const hasPrevPage = page > 1;
+
+        res.status(200).json({ 
+            success: true, 
+            data: posts,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalPosts,
+                hasNextPage,
+                hasPrevPage,
+                limit
+            }
+        });
     } catch (error) {
         console.log("Error in fetching posts: ", error.message);
         // If database is not connected, return empty array
         if (error.name === 'MongooseError' || error.message.includes('connection')) {
-            res.status(200).json({ success: true, data: [] });
+            res.status(200).json({ success: true, data: [], pagination: { currentPage: 1, totalPages: 0, totalPosts: 0, hasNextPage: false, hasPrevPage: false, limit: 10 } });
         } else {
             res.status(500).json({ success: false, message: "Server Error"});
         }
@@ -173,6 +330,7 @@ export const createPost = async (req, res) => {
             author: post.author,
             userId: new mongoose.Types.ObjectId(post.userId),
             image: post.image,
+            mediaType: post.mediaType || 'image', // Default to image if not specified
             likes: [],
             likesCount: 0
         });
@@ -381,10 +539,37 @@ export const getPostsByUserId = async (req, res) => {
     }
 
     try {
-        const posts = await Post.find({ userId })
-            .sort({ createdAt: -1 }); // Sort by newest first
+        // Get pagination parameters from query
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        // Get total count for this user
+        const totalPosts = await Post.countDocuments({ userId });
         
-        res.status(200).json({ success: true, data: posts });
+        // Get posts with pagination
+        const posts = await Post.find({ userId })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        // Calculate pagination info
+        const totalPages = Math.ceil(totalPosts / limit);
+        const hasNextPage = page < totalPages;
+        const hasPrevPage = page > 1;
+        
+        res.status(200).json({ 
+            success: true, 
+            data: posts,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalPosts,
+                hasNextPage,
+                hasPrevPage,
+                limit
+            }
+        });
     } catch (error) {
         console.log("Error in fetching user posts: ", error.message);
         res.status(500).json({ success: false, message: "Server Error"});
