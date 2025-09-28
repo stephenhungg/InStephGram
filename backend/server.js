@@ -47,10 +47,8 @@ app.get('/', (req, res) => {
 // For Vercel serverless
 export default app;
 
-// For local development
-if (process.env.NODE_ENV !== 'production') {
-    const PORT = process.env.PORT || 3001;
-    app.listen(PORT, () => {
-        console.log(`Server started at http://localhost:${PORT}`);
-    });
-}
+// Start server
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+    console.log(`Server started at http://localhost:${PORT}`);
+});

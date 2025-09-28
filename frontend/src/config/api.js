@@ -1,7 +1,8 @@
 const getApiBaseUrl = () => {
   if (import.meta.env.PROD) {
-    // In production on Vercel, use same domain (no CORS issues!)
-    return '';
+    // In production, use your deployed backend URL
+    // Replace this with your actual backend URL once deployed
+    return 'https://instephgram.onrender.com'; // or Railway, Render, etc.
   }
   // In development, use the local backend
   return 'http://localhost:3001';
